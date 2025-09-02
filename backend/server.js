@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const livresRoutes = require('./routes/livres');
 const authRouter = require('./routes/auth');
+const adminRoutes = require('./routes/admin'); // Importez le nouveau routeur
 
 dotenv.config();
 
@@ -23,10 +24,8 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRouter);
-
-// Utilisation des routes
+app.use('/api/admin', adminRoutes); // Montez le nouveau routeur ici
 app.use('/api/livres', livresRoutes);
-
 
 app.listen(port, () => {
     console.log(`Serveur en écoute sur le port ${port}`);
