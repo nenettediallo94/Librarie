@@ -1,0 +1,152 @@
+.info-generales {
+  flex: 1;
+  padding: 20px;
+}
+
+.info-generales h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #6d28d9;
+}
+
+.info-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #374151;
+}
+
+.info-form input,
+.info-form textarea,
+.info-form select {
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.info-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.draft-btn {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.next-btn {
+  background: #6d28d9;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+
+.title-subtitle {
+  display: flex;
+  gap: 10px;        /* espace entre les champs */
+  width: 100%;      /* prend toute la largeur disponible de la colonne */
+}
+
+.title-subtitle label {
+  flex: 1;          /* chaque label (et son input) prend une moitié */
+  display: flex;
+  flex-direction: column;
+}
+
+.title-subtitle input {
+  width: 100%;      /* l’input remplit entièrement son label */
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box; /* inclut le padding dans la largeur */
+}
+
+
+.author-coauthor {
+  display: flex;
+  gap: 10px;       /* espace entre les champs */
+  width: 100%;     /* occupe toute la largeur du conteneur */
+}
+
+.author-coauthor label {
+  flex: 1;         /* chaque label et input prend une moitié */
+  display: flex;
+  flex-direction: column;
+}
+
+.author-coauthor input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.genre-language {
+  display: flex;
+  gap: 10px;       /* espace entre les champs */
+  width: 100%;     /* occupe toute la largeur du conteneur */
+}
+
+.genre-language label {
+  flex: 1;         /* chaque label et input prend la moitié */
+  display: flex;
+  flex-direction: column;
+}
+
+.genre-language input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.pages-year-availability {
+  display: flex;
+  gap: 10px;       /* espace entre les 3 champs */
+  width: 100%;     /* occupe toute la largeur du conteneur */
+}
+
+.pages-year-availability label {
+  flex: 1;         /* chaque champ prend un tiers */
+  display: flex;
+  flex-direction: column;
+}
+
+.pages-year-availability input,
+.pages-year-availability select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+.pages-year-availability select {
+  background-color: white; /* pour éviter un fond gris par défaut */
+}

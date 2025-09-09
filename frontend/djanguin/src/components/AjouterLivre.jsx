@@ -1,0 +1,238 @@
+
+// import React, { useState } from "react";
+// import { Link } from "react-router-dom";
+// import StepIndicator from "./StepIndicator";
+// import InformationsGenerales from "./InformationsGenerales";
+// import EtapeContenu from "./EtapeContenu";
+// import EtapePublication from "./EtapePublication";
+// import BookPreview from "./BookPreview";
+// import TipsSection from "./TipsSection";
+// import { createLivre } from "../services/bookService";
+// import { useNavigate } from "react-router-dom";
+// import "./AjouterLivre.css";
+
+// const BookForm = () => {
+//   const navigate = useNavigate();
+//   const [formData, setFormData] = useState({
+//     title: "",
+//     subtitle: "",
+//     author: "",
+//     coauthors: "",
+//     genre: "",
+//     language: "",
+//     description: "",
+//     keywords: "",
+//     cover: null,
+//     file: null,
+//     pages: "",
+//     year: "",
+//     isbn: "",
+//     availability: "gratuit",
+//     allowDownload: false,
+//     allowCopy: false,
+//     allowComments: false,
+//   });
+
+//   const [currentStep, setCurrentStep] = useState(1);
+
+//    // Fonction pour envoyer le livre
+//   const handleSubmit = async () => {
+//     try {
+//       const data = new FormData();
+
+//       // Champs texte
+//       data.append("titre", formData.title);
+//       data.append("soustitre", formData.subtitle);
+//       data.append("auteur", formData.author);
+//       data.append("coauteurs", formData.coauthors);
+//       data.append("annee", formData.year);
+//       data.append("genre", formData.genre);
+//       data.append("langue", formData.language);
+//       data.append("description", formData.description);
+//       data.append(
+//         "motscles",
+//         JSON.stringify(formData.keywords ? formData.keywords.split(",") : [])
+//       );
+//       data.append("pages", formData.pages);
+//       data.append("isbn", formData.isbn);
+//       data.append("disponibilite", formData.availability);
+
+//       // Paramètres lecture
+//       data.append("allowDownload", formData.allowDownload);
+//       data.append("allowCopy", formData.allowCopy);
+//       data.append("allowComments", formData.allowComments);
+
+//       // Fichiers
+//       if (formData.cover) data.append("imageCouverture", formData.cover);
+//       if (formData.file) data.append("documentLivre", formData.file);
+
+//       // Envoi à l'API
+//       const createdBook = await createLivre(data);
+//       console.log("Livre créé :", createdBook);
+//       alert("Livre ajouté avec succès !");
+
+//       // Redirection vers le catalogue
+//       navigate("/CataloguePage");
+//     } catch (err) {
+//       console.error(err);
+//       alert("Erreur lors de l’ajout du livre.");
+//     }
+//   };
+
+//   return (
+//     <div className="book-form-container">
+//       {/* Header */}
+//       <div className="form-header">
+//         <h1 className="form-title">Ajouter un nouveau livre</h1>
+//         <Link to="/CataloguePage">
+//           <button className="back-btn">← Retour au catalogue</button>
+//         </Link>
+//       </div>
+
+//       {/* Barre de progression */}
+//       <StepIndicator currentStep={currentStep} />
+
+//       <div className="form-layout">
+//         {/* Colonne gauche : formulaire */}
+//         {currentStep === 1 && (
+//           <InformationsGenerales
+//             formData={formData}
+//             setFormData={setFormData}
+//             onNext={() => setCurrentStep(2)}
+//           />
+//         )}
+
+//         {currentStep === 2 && (
+//           <EtapeContenu
+//             formData={formData}
+//             setFormData={setFormData}
+//             onNext={() => setCurrentStep(3)}
+//             onPrev={() => setCurrentStep(1)}
+//           />
+//         )}
+
+//         {currentStep === 3 && (
+//           <EtapePublication
+//             formData={formData}
+//             setFormData={setFormData}
+//             onPrev={() => setCurrentStep(2)}
+//             onSubmit={handleSubmit} // Publier le livre
+//           />
+//         )}
+
+//         {/* Colonne droite : aperçu + conseils */}
+//         <div className="form-right">
+//           <BookPreview formData={formData} />
+//           <TipsSection />
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default BookForm;
+
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import InformationsGenerales from "./InformationsGenerales";
+import EtapeContenu from "./EtapeContenu";
+import EtapePublication from "./EtapePublication";
+import BookPreview from "./BookPreview";
+import TipsSection from "./TipsSection";
+import StepIndicator from "./StepIndicator";
+import { createLivre } from "../services/bookService";
+import "./AjouterLivre.css";
+
+const BookForm = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    title: "",
+    subtitle: "",
+    author: "",
+    coauthors: "",
+    genre: "",
+    language: "",
+    description: "",
+    keywords: "",
+    cover: null,
+    file: null,
+    pages: "",
+    year: "",
+    isbn: "",
+    availability: "gratuit",
+    allowDownload: false,
+    allowCopy: false,
+    allowComments: false,
+    excerpt: ""
+  });
+
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const handleSubmit = async () => {
+    try {
+      const data = new FormData();
+      data.append("titre", formData.title);
+      data.append("soustitre", formData.subtitle);
+      data.append("auteur", formData.author);
+      data.append("coauteurs", formData.coauthors);
+      data.append("annee", formData.year);
+      data.append("genre", formData.genre);
+      data.append("langue", formData.language);
+      data.append("description", formData.description);
+      data.append("motscles", JSON.stringify(formData.keywords ? formData.keywords.split(",") : []));
+      data.append("pages", formData.pages);
+      data.append("isbn", formData.isbn);
+      data.append("disponibilite", formData.availability);
+
+      data.append("allowDownload", formData.allowDownload ? "true" : "false");
+      data.append("allowCopy", formData.allowCopy ? "true" : "false");
+      data.append("allowComments", formData.allowComments ? "true" : "false");
+
+      if (formData.cover) data.append("imageCouverture", formData.cover);
+      if (formData.file) data.append("documentLivre", formData.file);
+
+      const createdBook = await createLivre(data);
+      console.log("Livre créé :", createdBook);
+      alert("Livre ajouté avec succès !");
+      navigate("/CataloguePage"); // renvoie automatiquement au catalogue
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l’ajout du livre.");
+    }
+  };
+
+  return (
+    <div className="book-form-container">
+      <div className="form-header">
+        <h1 className="form-title">Ajouter un nouveau livre</h1>
+        <Link to="/CataloguePage">
+          <button className="back-btn">← Retour au catalogue</button>
+        </Link>
+      </div>
+
+      <StepIndicator currentStep={currentStep} />
+
+      <div className="form-layout">
+        {currentStep === 1 && (
+          <InformationsGenerales formData={formData} setFormData={setFormData} onNext={() => setCurrentStep(2)} />
+        )}
+        {currentStep === 2 && (
+          <EtapeContenu formData={formData} setFormData={setFormData} onNext={() => setCurrentStep(3)} onPrev={() => setCurrentStep(1)} />
+        )}
+        {currentStep === 3 && (
+          <EtapePublication formData={formData} setFormData={setFormData} onPrev={() => setCurrentStep(2)} onSubmit={handleSubmit} />
+        )}
+
+        <div className="form-right">
+          <BookPreview formData={formData} />
+          <TipsSection />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BookForm;
+
+
+

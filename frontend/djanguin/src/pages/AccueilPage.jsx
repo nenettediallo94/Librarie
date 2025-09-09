@@ -1,145 +1,218 @@
-// // src/pages/HomePage.js
-
-// import React from 'react';
-// import backgroundImage from '../assets/couverturedjan.png'
-
-// function Accueil() {
-//   return (
-//     <div
-//       className="relative min-h-screen"
-//       style={{
-//         backgroundImage: `url(${backgroundImage})`,
-//         backgroundSize: "cover",
-//         backgroundPosition: "center",
-//       }}
-//     >
-//       {/* <div className="absolute inset-0 bg-black bg-opacity-80 backdrop-blur-xl z-0"></div> */}
-
-//       <div className="relative z-10">
-//         {/* Section Héro - MODIFIÉE */}
-//         <section className="h-[75vh] flex flex-col items-center justify-start p-8"> {/* Changed justify-center to justify-start */}
-//           <div className="text-center max-w-4xl mx-auto">
-//             {/* Titre en haut, gras, centré */}
-//             <h1 className="text-6xl font-extrabold mb-6 text-white leading-tight pt-16 shadow-lg">
-//               Découvrez la <span className="text-yellow-400">
-//                 Guinée
-//               </span>
-//             </h1>
-//             Paragraphe au centre, de taille différente */}
-//             <p className="text-xl sm:text-2xl font-light mb-8 mt-12"> Augmenté la taille du paragraphe, ajouté mt-12 pour le positionner
-//             {/* Dianguin vous donne accès à une vaste collection de romans, nouvelles et poésies d'auteurs guinéens. Une bibliothèque numérique pour valoriser notre patrimoine littéraire.
-//             </p> */}
-//             {/* <div className="flex flex-col sm:flex-row justify-center gap-4">
-//               <button className="bg-white text-[#160216] py-3 px-8 rounded-full font-bold shadow-lg hover:bg-gray-200 transition-colors">
-//                 Explorez le catalogue
-//               </button> */}
-//             {/* <button className="bg-transparent border-2 border-white text-white py-3 px-8 rounded-full font-bold shadow-lg hover:bg-white hover:text-[#160216] transition-colors">
-//                 Découvrez nos auteurs
-//               </button>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Dégradé de transition */}
-//         <div className="h-32 bg-gradient-to-b from-transparent to-white"></div>
-
-//         {/* Section Statistiques
-//         <section className="py-16 bg-white bg-opacity-90">
-//           <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center px-4">
-//             <div className="p-6 rounded-lg shadow-md bg-gray-50 hover:scale-105 transform transition duration-300">
-//               <h3 className="text-4xl font-bold text-teal-600">100</h3>
-//               <p className="mt-2 text-gray-700">Œuvres disponibles</p>
-//             </div>
-//             <div className="p-6 rounded-lg shadow-md bg-gray-50 hover:scale-105 transform transition duration-300">
-//               <h3 className="text-4xl font-bold text-teal-600">1500</h3>
-//               <p className="mt-2 text-gray-700">Utilisateurs</p>
-//             </div>
-//             <div className="p-6 rounded-lg shadow-md bg-gray-50 hover:scale-105 transform transition duration-300">
-//               <h3 className="text-4xl font-bold text-teal-600">Partout</h3>
-//               <p className="mt-2 text-gray-700">Disponible partout en Guinée</p>
-//             </div>
-//           </div>
-//         </section> */}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Accueil;
-// // src/pages/Accueil.jsx
-import React from "react";
-// import Header from "../components/Header";
-import backgroundImage from "../assets/couverturedjan.png"; // Mets ton image ici
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import backgroundImage from "../assets/couverturedjan.png";
+import { getLivres } from "../services/bookService";
+import { getActualites } from "../services/actualiteService";
 
 function Accueil() {
+  const [recentBooks, setRecentBooks] = useState([]);
+  const [actualites, setActualites] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const livresData = await getLivres();
+        setRecentBooks(livresData.slice(0, 3));
+
+        const actualitesData = await getActualites();
+        setActualites(actualitesData.slice(0, 3));
+      } catch (err) {
+        console.error("Erreur lors du chargement :", err);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
-    <div
-      className="relative min-h-screen flex flex-col justify-between bg-cover bg-center"
-      style={{ backgroundImage: `url(${backgroundImage})` }}
-    >
-      {/* Calque sombre */}
-      {/* <div className="absolute inset-0 bg-black bg-opacity-50"></div> */}
+    <>
+      {/* Section avec background */}
+      <div
+        className="relative min-h-screen flex flex-col justify-between bg-cover bg-center"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      >
+        <div className="relative z-10 flex-grow flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-white max-w-4xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
+              Découvrez la Littérature Guinéenne
+            </h1>
+            <p className="mt-4 max-w-3xl mx-auto text-lg font-bold mb-8">
+              Dianguin vous donne accès à une collection de romans, nouvelles et
+              poésies d’auteurs guinéens. Une bibliothèque numérique pour
+              valoriser notre patrimoine littéraire.
+            </p>
 
-      {/* Contenu */}
-      <div className="relative z-10 flex-grow flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
-        {/* Header importé */}
-        {/* <Header /> */}
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+              <Link
+                to="/CataloguePage"
+                className="bg-[#160216] px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-white hover:text-black transition-colors duration-300 text-center"
+              >
+                Explorez le catalogue
+              </Link>
+              <Link
+                to="/AuteurPage"
+                className="bg-transparent border-2 border-white text-white py-3 px-8 rounded-full font-bold shadow-lg hover:bg-white hover:text-[#160216] transition-colors duration-300 text-center"
+              >
+                Découvrez nos auteurs
+              </Link>
+            </div>
+          </div>
+        </div>
 
-        {/* Titre principal */}
-        <div className="text-center text-white max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
-            Découvrez la Littérature Guinéenne
-          </h1>
-
-          <p className="mt-4 max-w-3xl mx-auto text-lg font-bold mb-8">
-            Dianguin vous donne accès à une collection de romans, nouvelles et
-            poésies d’auteurs guinéens. Une bibliothèque numérique pour valoriser
-            notre patrimoine littéraire.
-          </p>
-
-          {/* Boutons */}
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-[#160216] px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-white hover:text-black transition-colors duration-300">
-              Explorez le catalogue
-            </button>
-            <button className="bg-transparent border-2 border-white text-white py-3 px-8 rounded-full font-bold shadow-lg hover:bg-white hover:text-[#160216] transition-colors duration-300">
-              Découvrez nos auteurs
-            </button>
+        {/* Statistiques */}
+        <div className="relative z-20 w-full mt-8">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+            <div className="bg-white text-black rounded-lg p-6 shadow-lg">
+              <p className="text-3xl font-bold">100</p>
+              <p>Œuvres disponibles</p>
+            </div>
+            <div className="bg-white text-black rounded-lg p-6 shadow-lg">
+              <p className="text-3xl font-bold">1500</p>
+              <p>Utilisateurs</p>
+            </div>
+            <div className="bg-white text-black rounded-lg p-6 shadow-lg">
+              <p className="text-3xl font-bold">🌍</p>
+              <p>Disponible partout en Guinée</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Statistiques */}
-      <div className="relative z-20 w-full mb-[-60px]">
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl px-4">
-        <div className="bg-white text-black rounded-lg p-6 shadow-lg">
-          <p className="text-3xl font-bold">100</p>
-          <p>Œuvres disponibles</p>
+      {/* Section livres récents */}
+      <div className="bg-white text-black rounded-lg p-6 shadow-lg w-full max-w-8xl mx-auto my-12 flex flex-col">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-2xl font-bold">📖 Livres ajoutés récemment</h2>
+            <p className="text-gray-600 text-sm">
+              Les œuvres les plus appréciées par nos lecteurs
+            </p>
+          </div>
+          <Link
+            to="/CataloguePage"
+            className="text-sm bg-[#160216] text-white px-4 py-2 rounded-full hover:bg-white hover:text-[#160216] border border-[#160216] transition"
+          >
+            Voir tout
+          </Link>
         </div>
-        <div className="bg-white text-black rounded-lg p-6 shadow-lg">
-          <p className="text-3xl font-bold">1500</p>
-          <p>Utilisateurs</p>
-        </div>
-        <div className="bg-white text-black rounded-lg p-6 shadow-lg">
-          <p className="text-3xl font-bold">🌍</p>
-          <p>Disponible partout en Guinée</p>
-        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {recentBooks.length > 0 ? (
+            recentBooks.map((livre) => (
+              <div
+                key={livre._id}
+                className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition flex flex-col"
+              >
+                <img
+                  src={`http://localhost:5000/${livre.imageCouverture}`}
+                  alt={livre.titre}
+                  className="h-48 w-full object-cover"
+                />
+                <div className="p-4 flex flex-col flex-1">
+                  <h4 className="text-lg font-bold truncate">{livre.titre}</h4>
+                  <p className="text-sm font-semibold mb-2">{livre.auteur}</p>
+                  <div className="flex justify-between text-xs mb-2">
+                    <span className="italic">{livre.genre}</span>
+                    <span
+                      className={`font-semibold ${
+                        livre.disponibilite === "gratuit"
+                          ? "text-green-600"
+                          : "text-orange-500"
+                      }`}
+                    >
+                      {livre.disponibilite === "gratuit"
+                        ? "Gratuit ✅"
+                        : "Abonnement ❌"}
+                    </span>
+                    <span>{livre.langue}</span>
+                  </div>
+                  <p className="text-xs text-gray-700 line-clamp-2 mb-2">
+                    {livre.description
+                      ? livre.description.substring(0, 200) + "..."
+                      : "Description non disponible"}
+                  </p>
+                  <div className="flex justify-between items-center mt-auto text-xs">
+                    <span>{livre.pages || "120"} pages</span>
+                    <span>{livre.annee || "2025"}</span>
+                    <Link
+                      to={`/Livre/${livre._id}`}
+                      className="text-sm bg-[#160216] text-white py-1 px-3 rounded hover:bg-purple-700 transition-colors"
+                    >
+                      Voir détails
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 italic">Aucun livre ajouté récemment.</p>
+          )}
         </div>
       </div>
 
-      <div className="bg-white text-black rounded-lg p-6 shadow-lg">
-        <p className="text-3xl font-bold">Livres ajoutés récemment</p>
-        <ul className="mt-4">
-          <li className="border-b py-2">Titre du livre 1</li>
-          <li className="border-b py-2">Titre du livre 2</li>
-          <li className="border-b py-2">Titre du livre 3</li>
-        </ul>
-      </div>
+      {/* Section Nos nouveautés + Actualités */}
+      <div className="bg-white rounded-lg shadow-md my-8 mx-4 md:mx-auto md:max-w-8xl flex flex-col md:flex-row overflow-hidden gap-4">
+        
+        {/* Sous-section Nouveautés */}
+        {recentBooks.length > 0 && (
+          <div className="flex-1 p-4 flex flex-col justify-center bg-purple-50 rounded-md">
+            <h2 className="text-xl font-bold mb-1 text-purple-700 flex items-center gap-1">Nos nouveautés</h2>
+            <p className="text-gray-600 mb-2 text-sm">Le dernier ajout à notre collection, à ne pas manquer !</p>
 
-    </div>
+            <div className="flex-1 overflow-hidden md:flex hidden mt-4">
+              <img
+                src={`http://localhost:5000/${recentBooks[0].imageCouverture}`}
+                alt={recentBooks[0].titre}
+                className="h-72 w-full object-cover transform hover:scale-105 transition-transform duration-300 rounded-md"
+              />
+            </div>
+
+            <h3 className="text-lg font-semibold truncate mb-1">{recentBooks[0].titre}</h3>
+            <p className="text-sm text-gray-700 mb-2 truncate">{recentBooks[0].auteur}</p>
+
+            <div className="flex flex-wrap gap-1 mb-2 text-xs">
+              <span className="italic bg-purple-100 text-purple-700 px-2 py-0.5 rounded">{recentBooks[0].genre}</span>
+              <span className={`px-2 py-0.5 rounded font-semibold ${recentBooks[0].disponibilite === "gratuit" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
+                {recentBooks[0].disponibilite === "gratuit" ? "Gratuit ✅" : "Abonnement ❌"}
+              </span>
+              <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">{recentBooks[0].langue}</span>
+            </div>
+
+            <p className="text-gray-700 mb-3 line-clamp-2 text-sm">
+              {recentBooks[0].description ? recentBooks[0].description.substring(0, 120) + "..." : "Description non disponible"}
+            </p>
+
+            <div className="flex gap-2 items-center text-xs">
+              <span className="px-2 py-0.5 bg-gray-100 rounded">{recentBooks[0].pages || "120"} pages</span>
+              <span className="px-2 py-0.5 bg-gray-100 rounded">{recentBooks[0].annee || "2025"}</span>
+              <Link to={`/Livre/${recentBooks[0]._id}`} className="bg-purple-600 text-white py-1 px-2 rounded hover:bg-purple-700 transition-colors text-xs">
+                Voir détails
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Sous-section Actualités dynamique */}
+        {actualites.length > 0 && (
+          <div className="flex-1 p-4 flex flex-col justify-start bg-blue-50 rounded-md border-t md:border-t-0 md:border-l border-gray-200">
+            <h2 className="text-xl font-bold mb-2 text-blue-700 flex items-center gap-1">📰 Actualités</h2>
+
+            <div className="flex flex-col gap-2 text-sm text-gray-700">
+              {actualites.map((actu) => (
+                <div key={actu._id} className="border-b border-gray-200 pb-2">
+                  <h3 className="font-semibold">{actu.titre}</h3>
+                  <p className="line-clamp-2 text-gray-600">{actu.extrait}</p>
+                </div>
+              ))}
+
+              <Link to="/ActualitesPage" className="mt-2 text-blue-600 text-xs font-semibold hover:underline">
+                Voir toutes les actualités
+              </Link>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </>
   );
 }
 
 export default Accueil;
-
-

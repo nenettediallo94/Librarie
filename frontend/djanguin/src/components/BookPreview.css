@@ -1,0 +1,113 @@
+/* .book-preview {
+  margin-bottom: 20px;
+}
+
+.book-preview h3 {
+  font-size: 18px;
+  color: #6d28d9;
+  margin-bottom: 10px;
+}
+
+.preview-card {
+  display: flex;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f9fafb;
+}
+
+.cover {
+  width: 100px;
+  height: 140px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-right: 12px;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-placeholder {
+  font-size: 40px;
+  color: #9ca3af;
+}
+
+.details h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.details .author,
+.details .meta,
+.details .description,
+.details .availability {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.details .description {
+  color: #4b5563;
+}
+
+.details .availability {
+  font-weight: bold;
+  color: #6d28d9;
+} */
+
+
+
+.book-preview {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 400px; /* ↑ augmenter la longueur totale du bloc */
+}
+
+.preview-card {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Couverture plus longue */
+.cover-img,
+.cover-placeholder {
+  width: 100%;
+  height: 300px; /* ↑ longueur plus grande */
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.details {
+  flex: 1;
+}
+
+.details h4 {
+  font-size: 18px;
+  margin: 0 0 6px 0;
+}
+
+.details p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.desc {
+  color: #4b5563;
+}

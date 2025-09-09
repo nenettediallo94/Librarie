@@ -23,6 +23,11 @@ mongoose.connect(process.env.MONGO_URI, {
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// Servir le dossier public pour les images et fichiers PDF
+app.use('/public', express.static('public'));
+
+// Routes
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRoutes); // Montez le nouveau routeur ici
 app.use('/api/livres', livresRoutes);
