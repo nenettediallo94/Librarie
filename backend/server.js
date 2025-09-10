@@ -4,7 +4,10 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const livresRoutes = require('./routes/livres');
 const authRouter = require('./routes/auth');
-const adminRoutes = require('./routes/admin'); // Importez le nouveau routeur
+const adminRoutes = require('./routes/admin'); 
+const auteursRoutes = require('./routes/auteurs')  
+const usersRoutes = require('./routes/users') 
+const plansRoutes = require('./routes/plans') // Importez le nouveau routeur
 
 dotenv.config();
 
@@ -31,6 +34,9 @@ app.use('/public', express.static('public'));
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRoutes); // Montez le nouveau routeur ici
 app.use('/api/livres', livresRoutes);
+app.use('/api/auteurs', auteursRoutes); // Nouvelle route pour les auteurs
+app.use('/api/users', usersRoutes); // Montez le nouveau routeur ici
+app.use('/api/plans', plansRoutes); // Montez le nouveau routeur ici
 
 app.listen(port, () => {
     console.log(`Serveur en écoute sur le port ${port}`);

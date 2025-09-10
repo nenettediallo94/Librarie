@@ -7,7 +7,7 @@ function Header() {
   const menuItems = [
     { name: "Accueil", path: "/" },
     { name: "Catalogue", path: "/CataloguePage" },
-    { name: "Auteurs", path: "/AuteursPage" },
+    { name: "Auteurs", path: "/AuteurPage" },
     { name: "Abonnement", path: "/AbonnementPage" },
     { name: "Mon espace", path: "/MonEspacePage" }
   ];
