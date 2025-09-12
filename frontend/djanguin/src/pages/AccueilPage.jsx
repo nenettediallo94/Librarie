@@ -99,6 +99,7 @@ function Accueil() {
             recentBooks.map((livre) => (
               <div
                 key={livre._id}
+                id={`livre-${livre._id}`} // 👈 id unique pour scrollIntoView
                 className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition flex flex-col"
               >
                 <img
@@ -112,15 +113,12 @@ function Accueil() {
                   <div className="flex justify-between text-xs mb-2">
                     <span className="italic">{livre.genre}</span>
                     <span
-                      className={`font-semibold ${
-                        livre.disponibilite === "gratuit"
-                          ? "text-green-600"
-                          : "text-orange-500"
-                      }`}
+                      className={`font-semibold ${livre.disponibilite === "gratuit"
+                        ? "text-green-600"
+                        : "text-orange-500"
+                        }`}
                     >
-                      {livre.disponibilite === "gratuit"
-                        ? "Gratuit ✅"
-                        : "Abonnement ❌"}
+                      {livre.disponibilite === "gratuit" ? "Gratuit ✅" : "Abonnement ❌"}
                     </span>
                     <span>{livre.langue}</span>
                   </div>
@@ -132,8 +130,11 @@ function Accueil() {
                   <div className="flex justify-between items-center mt-auto text-xs">
                     <span>{livre.pages || "120"} pages</span>
                     <span>{livre.annee || "2025"}</span>
+
+                    {/* 🔥 Adaptation avec scrollPosition */}
                     <Link
                       to={`/Livre/${livre._id}`}
+                      state={{ livreId: livre._id, scrollPosition: window.scrollY }} // 👈 on envoie l'id et la position
                       className="text-sm bg-[#160216] text-white py-1 px-3 rounded hover:bg-purple-700 transition-colors"
                     >
                       Voir détails
@@ -148,12 +149,16 @@ function Accueil() {
         </div>
       </div>
 
+
       {/* Section Nos nouveautés + Actualités */}
       <div className="bg-white rounded-lg shadow-md my-8 mx-4 md:mx-auto md:max-w-8xl flex flex-col md:flex-row overflow-hidden gap-4">
-        
+
         {/* Sous-section Nouveautés */}
         {recentBooks.length > 0 && (
-          <div className="flex-1 p-4 flex flex-col justify-center bg-purple-50 rounded-md">
+          <div
+            id={`livre-${recentBooks[0]._id}`} // 👈 id unique pour scrollIntoView
+            className="flex-1 p-4 flex flex-col justify-center bg-purple-50 rounded-md"
+          >
             <h2 className="text-xl font-bold mb-1 text-purple-700 flex items-center gap-1">Nos nouveautés</h2>
             <p className="text-gray-600 mb-2 text-sm">Le dernier ajout à notre collection, à ne pas manquer !</p>
 
@@ -183,12 +188,19 @@ function Accueil() {
             <div className="flex gap-2 items-center text-xs">
               <span className="px-2 py-0.5 bg-gray-100 rounded">{recentBooks[0].pages || "120"} pages</span>
               <span className="px-2 py-0.5 bg-gray-100 rounded">{recentBooks[0].annee || "2025"}</span>
-              <Link to={`/Livre/${recentBooks[0]._id}`} className="bg-purple-600 text-white py-1 px-2 rounded hover:bg-purple-700 transition-colors text-xs">
+
+              {/* 🔥 Adaptation pour scroll vers livre précis */}
+              <Link
+                to={`/Livre/${recentBooks[0]._id}`}
+                state={{ livreId: recentBooks[0]._id }} // 👈 on envoie l'id du livre
+                className="bg-purple-600 text-white py-1 px-2 rounded hover:bg-purple-700 transition-colors text-xs"
+              >
                 Voir détails
               </Link>
             </div>
           </div>
         )}
+
 
         {/* Sous-section Actualités dynamique */}
         {actualites.length > 0 && (

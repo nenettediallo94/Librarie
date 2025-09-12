@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
 
     // Récupère uniquement les auteurs approuvés
     const auteurs = await User.find({ role: 'auteur', estApprouve: true })
-      .select('prenoms nom imageProfil biographie') // champs utiles seulement
+      .select('prenoms nom imageProfil biographie genrePrefere') // champs utiles seulement
       .skip(skip)
       .limit(limit);
 

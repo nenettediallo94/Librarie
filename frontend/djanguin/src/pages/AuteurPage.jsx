@@ -1,89 +1,4 @@
-// import React, { useEffect, useState } from "react";
-// import { getAuteurs } from "../services/auteurService";
-// import { Link } from "react-router-dom";
 
-// function AuteurPage() {
-//   const [auteurs, setAuteurs] = useState([]);
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const auteursPerPage = 8;
-
-//   useEffect(() => {
-//     const fetchAuteurs = async () => {
-//       try {
-//         const data = await getAuteurs(); // récupérer tous les auteurs
-//         setAuteurs(data);
-//       } catch (err) {
-//         console.error("Erreur lors du chargement des auteurs :", err);
-//       }
-//     };
-//     fetchAuteurs();
-//   }, []);
-
-//   // Calcul des auteurs à afficher pour la page actuelle
-//   const indexOfLast = currentPage * auteursPerPage;
-//   const indexOfFirst = indexOfLast - auteursPerPage;
-//   const currentAuteurs = auteurs.slice(indexOfFirst, indexOfLast);
-
-//   // Pagination
-//   const totalPages = Math.ceil(auteurs.length / auteursPerPage);
-//   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-//   return (
-//     <div className="max-w-7xl mx-auto px-4 py-8">
-//       <h1 className="text-3xl font-bold mb-6 text-center">Nos auteurs</h1>
-
-//       {currentAuteurs.length > 0 ? (
-//         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-//           {currentAuteurs.map((auteur) => (
-//             <div
-//               key={auteur._id}
-//               className="flex flex-col items-center text-center bg-white shadow rounded-lg p-4"
-//             >
-//               <img
-//                 src={`http://localhost:5000/${auteur.photo}`}
-//                 alt={auteur.nom}
-//                 className="w-24 h-24 rounded-full object-cover mb-2"
-//               />
-//               <h3 className="text-lg font-semibold">{auteur.nom}</h3>
-//               <p className="text-sm text-gray-600">
-//                 {auteur.bio ? auteur.bio.substring(0, 60) + "..." : ""}
-//               </p>
-//               <Link
-//                 to={`/Auteur/${auteur._id}`}
-//                 className="mt-2 text-purple-600 text-xs font-semibold hover:underline"
-//               >
-//                 Voir profil
-//               </Link>
-//             </div>
-//           ))}
-//         </div>
-//       ) : (
-//         <p className="text-center text-gray-500">Aucun auteur disponible pour le moment.</p>
-//       )}
-
-//       {/* Pagination */}
-//       {totalPages > 1 && (
-//         <div className="flex justify-center mt-6 gap-2">
-//           {pageNumbers.map((num) => (
-//             <button
-//               key={num}
-//               onClick={() => setCurrentPage(num)}
-//               className={`px-3 py-1 rounded-md border ${
-//                 currentPage === num
-//                   ? "bg-purple-600 text-white border-purple-600"
-//                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-//               }`}
-//             >
-//               {num}
-//             </button>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default AuteurPage;
 
 import React, { useEffect, useState } from "react";
 import { getAuteurs } from "../services/auteurService";
@@ -93,7 +8,8 @@ function AuteurPage() {
   const [auteurs, setAuteurs] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 8; // nombre d’auteurs par page
+  const [searchTerm, setSearchTerm] = useState("");
+  const limit = 8;
 
   useEffect(() => {
     chargerAuteurs(page);
@@ -102,11 +18,8 @@ function AuteurPage() {
   const chargerAuteurs = async (pageActuelle) => {
     try {
       const data = await getAuteurs(pageActuelle, limit);
-      if (pageActuelle === 1) {
-        setAuteurs(data.auteurs); // première page → remplacer
-      } else {
-        setAuteurs((prev) => [...prev, ...data.auteurs]); // pages suivantes → ajouter
-      }
+      if (pageActuelle === 1) setAuteurs(data.auteurs);
+      else setAuteurs((prev) => [...prev, ...data.auteurs]);
       setTotalPages(data.totalPages);
     } catch (err) {
       console.error("Erreur:", err);
@@ -114,44 +27,89 @@ function AuteurPage() {
   };
 
   const chargerPlus = () => {
-    if (page < totalPages) {
-      setPage((prev) => prev + 1);
-    }
+    if (page < totalPages) setPage((prev) => prev + 1);
   };
+
+  const filteredAuteurs = auteurs.filter((auteur) =>
+    `${auteur.prenoms} ${auteur.nom}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+    (auteur.biographie && auteur.biographie.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="container mx-auto px-6 py-8">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Nos auteurs</h1>
-            <Link
-              to="/AjouterUser"
-              className="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 transition-colors"
+      {/* Barre supérieure */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h1 className="text-3xl font-bold text-gray-900">Nos auteurs</h1>
+
+        <div className="relative w-full sm:w-1/3">
+          <input
+            type="text"
+            placeholder="Rechercher un auteur..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full py-2 px-4 rounded-full bg-white border border-gray-600 text-[#160216] placeholder-[#160216] focus:outline-none focus:ring-2 focus:ring-[#160216]"
+          />
+        </div>
+
+        <Link
+          to="/AjouterUser"
+          className="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 transition-colors"
+        >
+          Ajouter un nouvel auteur
+        </Link>
+      </div>
+
+      {/* Liste des auteurs filtrés */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {filteredAuteurs.length > 0 ? (
+          filteredAuteurs.map((auteur) => (
+            <div
+              key={auteur._id}
+              className="p-6 border rounded-xl shadow-lg bg-white flex flex-col items-center text-center"
             >
-              Ajouter un nouvel auteur
-            </Link>
-          </div>
+              {/* Image */}
+              <img
+                src={auteur.imageProfil ? `http://localhost:5000/${auteur.imageProfil}` : "/default-avatar.png"}
+                alt={`${auteur.prenoms} ${auteur.nom}`}
+                className="w-32 h-32 rounded-full object-cover mb-4"
+              />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {auteurs && auteurs.length > 0 ? (
-  auteurs.map((auteur) => (
-    <div key={auteur._id} className="p-4 border rounded-lg shadow-md bg-white">
-      <img
-        src={auteur.imageProfil || "/default-avatar.png"}
-        alt={`${auteur.prenoms} ${auteur.nom}`}
-        className="w-24 h-24 rounded-full mx-auto"
-      />
-      <h3 className="mt-2 font-semibold text-center">
-        {auteur.prenoms} {auteur.nom}
-      </h3>
-      <p className="text-sm text-gray-600 text-center">
-        {auteur.biographie?.substring(0, 60)}...
-      </p>
-    </div>
-  ))
-) : (
-  <p className="text-center text-gray-500">Aucun auteur trouvé.</p>
-)}
+              {/* Nom */}
+              <h3 className="text-xl font-semibold mb-1">
+                {auteur.prenoms} {auteur.nom}
+              </h3>
 
+              {/* Genre préféré */}
+              <p className="text-sm font-semibold text-gray-700 mb-2">
+                 {auteur.genrePrefere || "Pas disponible"}
+              </p>
+
+              {/* Biographie sur 2 lignes */}
+              <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                {auteur.biographie || "Pas de biographie disponible."}
+              </p>
+
+              {/* Nombre d’œuvres */}
+              <p className="text-gray-800 font-medium mb-4">
+                Œuvres disponibles : {auteur.nbOeuvres || 0}
+              </p>
+
+              {/* Bouton Voir ses œuvres */}
+              <Link
+                to={`/AuteurLivresPage/${auteur._id}`}
+                className="bg-white text-black px-4 py-2 rounded-lg hover:bg-[#160216] transition-colors"
+              >
+                Voir ses œuvres
+              </Link>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 col-span-full">
+            Aucun auteur ne correspond à votre recherche.
+          </p>
+        )}
       </div>
 
       {/* Bouton Voir plus */}
