@@ -18,11 +18,7 @@ const livreSchema = new mongoose.Schema({
         trim: true
     },
 
-//     auteur: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'User', // Assurez-vous que c'est le nom de votre modèle d'utilisateur
-//     required: true
-// },
+
 
     coauteurs: {
         type: [String] // Tableau de chaînes de caractères
