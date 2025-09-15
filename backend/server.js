@@ -11,6 +11,8 @@ const usersRoutes = require('./routes/users');
 const plansRoutes = require('./routes/plans');
 const searchRoutes = require('./routes/search');
 const adminloginRoutes = require('./routes/adminlogin');
+const actualitesRoutes = require('./routes/actualites');
+const temoignagesRoutes = require('./routes/temoignages');
 
 
 dotenv.config();
@@ -38,6 +40,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/plans', plansRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/adminlogin', adminloginRoutes);
+app.use('/api/actualites', actualitesRoutes);
+app.use('/api/temoignages', temoignagesRoutes);
 
 // route dynamique pour oeuvres
 

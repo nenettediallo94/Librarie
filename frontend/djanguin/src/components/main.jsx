@@ -53,6 +53,12 @@ import AuteurLivresPage from "../pages/AuteurLivresPage";
 import AdminLogin from "./AdminLogin";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardAdmin from "../pages/DashboardAdmin"; // <-- Ajouter ton dashboard
+import AjouterActualite from "./AjouterActualite"; // <-- Importer le composant d'ajout d'actualité
+import ActualitesPage from "../pages/ActualitePage";
+import ActualiteDetail from "../components/ActualiteDetail"; // <-- Importer le composant de détail d'actualité
+import FAQ from "./FAQ";
+
+
 
 function Main() {
   return (
@@ -66,6 +72,10 @@ function Main() {
         <Route path="/AjouterUser" element={<AjouterUser />} />
         <Route path="/AbonnementPage" element={<Abonnement />} />
         <Route path="/AuteurLivresPage/:auteurId" element={<AuteurLivresPage />} />
+        <Route path="/AjouterActualite" element={<AjouterActualite />} />
+        <Route path="/ActualitesPage" element={<ActualitesPage />} />
+        <Route path="/Actualite/:id" element={<ActualiteDetail />} />
+        <Route path="/FAQ" element={<FAQ />} />
 
         {/* Connexion admin */}
         <Route path="/AdminLogin" element={<AdminLogin />} />

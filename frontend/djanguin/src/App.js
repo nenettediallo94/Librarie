@@ -34,6 +34,7 @@ import './App.css';
 import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Main from './components/main';
+import Footer from './components/Footer';
 
 function App() {
   const location = useLocation();
@@ -42,7 +43,8 @@ function App() {
   const noHeaderPaths = [
     '/AjouterLivre', // formulaire
     '/AdminLogin',   // page login admin
-    '/admin/dashboard' // dashboard admin
+    '/admin/dashboard', // dashboard admin
+    '/AjouterActualite', // page ajout actualité
   ];
 
   const hideHeader = noHeaderPaths.includes(location.pathname);
@@ -52,8 +54,10 @@ function App() {
       {/* Header conditionnel */}
       {!hideHeader && <Header />}
       <main className="flex-grow">
+        
         <Main />
       </main>
+      <Footer />
     </div>
   );
 }

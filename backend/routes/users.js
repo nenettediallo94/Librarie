@@ -82,5 +82,32 @@ router.post('/', upload.single('imageProfil'), async (req, res) => {
   }
 });
 
+// Route GET pour récupérer tous les utilisateurs
+router.get('/', async (req, res) => {
+  try {
+    const users = await User.find().select('-motDePasse'); // on exclut le mot de passe
+    res.status(200).json({ users });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
+  }
+});
+
+// Route GET pour récupérer un utilisateur par ID
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-motDePasse');
+    if (!user) return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    res.status(200).json({ user });
+  } catch (err) {
+    console.error(err);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    res.status(500).json({ message: 'Erreur lors de la récupération de l’utilisateur' });
+  }
+});
+
+
 module.exports = router;
 
