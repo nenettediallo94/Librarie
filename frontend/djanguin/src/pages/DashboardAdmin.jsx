@@ -1,1087 +1,6 @@
-
-
-// import React, { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// // ✅ Constantes pour les routes API
-// const API_URL_LIVRES = "http://localhost:5000/api/livres";
-// const API_URL_AUTEURS = "http://localhost:5000/api/auteurs";
-
-// function DashboardAdmin() {
-//     const [activeMenu, setActiveMenu] = useState("vue-ensemble");
-//     const [adminName, setAdminName] = useState("");
-//     const [livres, setLivres] = useState([]);
-//     const [livreSelectionne, setLivreSelectionne] = useState(null);
-
-//     // ✅ États pour la gestion des auteurs
-//     const [auteurs, setAuteurs] = useState([]);
-//     const [totalAuteurs, setTotalAuteurs] = useState(0);
-//     const [currentPage, setCurrentPage] = useState(1);
-//     const [itemsPerPage] = useState(8); // S'aligne avec le backend
-//     const [loadingAuteurs, setLoadingAuteurs] = useState(true);
-
-//     const navigate = useNavigate();
-
-//     // --- Récupération du nom de l'admin ---
-//     useEffect(() => {
-//         const token = localStorage.getItem("token");
-//         if (token) {
-//             try {
-//                 const payload = JSON.parse(atob(token.split(".")[1]));
-//                 setAdminName(payload.user?.email || "Admin");
-//             } catch (err) {
-//                 console.error("Erreur décodage token:", err);
-//                 setAdminName("Admin");
-//             }
-//         }
-//     }, []);
-
-//     // --- Récupération des livres ---
-//     useEffect(() => {
-//         const fetchLivres = async () => {
-//             try {
-//                 const res = await fetch(API_URL_LIVRES, {
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                     },
-//                 });
-//                 if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-//                 const data = await res.json();
-//                 setLivres(Array.isArray(data) ? data : []);
-//             } catch (err) {
-//                 console.error("Erreur fetch livres:", err);
-//             }
-//         };
-//         fetchLivres();
-//     }, []);
-
-//     // --- Récupération des auteurs avec pagination ---
-//     useEffect(() => {
-//         const fetchAuteurs = async () => {
-//             setLoadingAuteurs(true);
-//             try {
-//                 // Envoie les paramètres de pagination au backend
-//                 const res = await fetch(`${API_URL_AUTEURS}?page=${currentPage}&limit=${itemsPerPage}`, {
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                     },
-//                 });
-//                 if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-//                 const data = await res.json();
-//                 setAuteurs(Array.isArray(data.auteurs) ? data.auteurs : []);
-//                 setTotalAuteurs(data.total);
-//             } catch (err) {
-//                 console.error("Erreur fetch auteurs:", err);
-//                 setAuteurs([]);
-//             } finally {
-//                 setLoadingAuteurs(false);
-//             }
-//         };
-//         fetchAuteurs();
-//     }, [currentPage, itemsPerPage]); // Déclenche la requête à chaque changement de page
-
-//     // --- Fonctions d'action ---
-//     const handleLogout = () => {
-//         localStorage.removeItem("token");
-//         navigate("/");
-//     };
-
-//     const handleRetour = () => {
-//         navigate("/");
-//     };
-
-//     // ✅ Logique de mise à jour du statut (cette route PATCH n'existe pas dans le backend donné, elle est gardée pour référence)
-//     const handleUpdateStatus = async (auteurId, newStatus) => {
-//         try {
-//             // Note: Le backend fourni ne gère pas cette route. Ce code ne fonctionnera que si tu l'ajoutes.
-//             const res = await fetch(`${API_URL_AUTEURS}/${auteurId}/statut`, {
-//                 method: "PATCH",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                     Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                 },
-//                 body: JSON.stringify({ statut: newStatus }),
-//             });
-//             if (!res.ok) throw new Error("Erreur lors de la mise à jour du statut");
-//             alert("Statut mis à jour !");
-//             // Recharger la liste des auteurs après la mise à jour
-//             setCurrentPage(1); // Retour à la première page
-//             // On re-déclenche le useEffect pour un re-fetch
-//             // Il serait mieux de mettre à jour l'état local, mais un re-fetch est plus simple
-//             // pour le moment si le backend est complexe.
-//         } catch (err) {
-//             console.error("Erreur mise à jour statut:", err);
-//             alert("Erreur lors de la mise à jour du statut");
-//         }
-//     };
-
-//     const totalPages = Math.ceil(totalAuteurs / itemsPerPage);
-
-//     const menuItems = [
-//         { key: "vue-ensemble", label: "Vue d'ensemble" },
-//         { key: "livres", label: "Livres" },
-//         { key: "auteurs", label: "Auteurs" },
-//         { key: "abonnements", label: "Abonnements" },
-//         { key: "revenus", label: "Revenus" },
-//         { key: "parametres", label: "Paramètres" },
-//     ];
-
-//     return (
-//         <div className="flex min-h-screen">
-//             {/* Barre latérale */}
-//             <aside className="w-64 bg-[#160216] flex flex-col justify-between p-6 rounded-l-lg shadow-lg">
-//                 <div>
-//                     <h2 className="text-2xl font-bold mb-6 text-white">Admin Dashboard</h2>
-//                     <ul className="flex flex-col gap-2">
-//                         {menuItems.map((item) => (
-//                             <li
-//                                 key={item.key}
-//                                 onClick={() => setActiveMenu(item.key)}
-//                                 className={`cursor-pointer px-4 py-2 rounded-md transition-all font-semibold ${activeMenu === item.key
-//                                         ? "bg-white text-[#160216]"
-//                                         : "bg-[#160216] text-white hover:bg-white hover:text-[#160216]"
-//                                     }`}
-//                             >
-//                                 {item.label}
-//                             </li>
-//                         ))}
-//                     </ul>
-//                 </div>
-//                 <div className="flex flex-col gap-2">
-//                     <button
-//                         onClick={handleLogout}
-//                         className="w-full bg-[#ff0000] text-white py-2 rounded hover:bg-[#cc0000] transition"
-//                     >
-//                         Déconnexion
-//                     </button>
-//                     <button
-//                         onClick={handleRetour}
-//                         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-//                     >
-//                         Retour sur la plateforme
-//                     </button>
-//                 </div>
-//             </aside>
-
-//             {/* Contenu principal */}
-//             <main className="flex-1 flex flex-col bg-[#DEDEDE]">
-//                 {/* Barre supérieure */}
-//                 <div className="mx-6 my-6 p-6 bg-[#F5F5F5] border border-gray-400 rounded-xl shadow-sm flex justify-between items-center">
-//                     <h1 className="text-3xl font-bold text-gray-800">Tableau de bord</h1>
-//                     <div className="flex items-center gap-4">
-//                         <button className="relative">
-//                             <svg
-//                                 xmlns="http://www.w3.org/2000/svg"
-//                                 className="h-6 w-6 text-gray-800"
-//                                 fill="none"
-//                                 viewBox="0 0 24 24"
-//                                 stroke="currentColor"
-//                             >
-//                                 <path
-//                                     strokeLinecap="round"
-//                                     strokeLinejoin="round"
-//                                     strokeWidth="2"
-//                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-5M9 17H4l1.405-1.405A2.032 2.032 0 006 14.158V11a6 6 0 0112 0v3.159c0 .538.214 1.055.595 1.436L20 17h-5m-4 0v1a3 3 0 006 0v-1m-6 0h6"
-//                                 />
-//                             </svg>
-//                             <span className="absolute top-0 right-0 h-2 w-2 bg-red-600 rounded-full"></span>
-//                         </button>
-
-//                         <div className="flex items-center gap-2 bg-white p-2 rounded-full">
-//                             <img
-//                                 src="https://via.placeholder.com/40"
-//                                 alt="Profil"
-//                                 className="w-10 h-10 rounded-full"
-//                             />
-//                             <span className="font-medium text-gray-800">{adminName}</span>
-//                         </div>
-//                     </div>
-//                 </div>
-
-//                 {/* Cartes de stats */}
-//                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-6">
-//                     {/* Abonnés */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Abonnés</h3>
-//                             <p className="text-2xl font-semibold">120</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Livres publiés */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Livres publiés</h3>
-//                             <p className="text-xl font-semibold">{livres.length}</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Auteurs */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Auteurs</h3>
-//                             <p className="text-xl font-semibold">{totalAuteurs}</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Livres lus 75% */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Livres lus (75%)</h3>
-//                             <p className="text-xl font-semibold">80</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Revenus */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Revenus</h3>
-//                             <p className="text-xl font-semibold">$1200</p>
-//                         </div>
-//                     </div>
-//                 </div>
-
-//                 {/* Sections */}
-//                 <div className="flex-1 p-8">
-//                     {activeMenu === "vue-ensemble" && (
-//                         <div>
-//                             <h2 className="text-xl font-semibold mb-4">Vue d'ensemble</h2>
-//                             <p>Statistiques globales : utilisateurs, livres, abonnements, revenus...</p>
-//                         </div>
-//                     )}
-
-//                     {activeMenu === "livres" && (
-//                         <div>
-//                             <h2 className="text-xl font-semibold mb-4">Gestion des livres</h2>
-//                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-//                                 {livres.map((livre) => (
-//                                     <div key={livre._id} className="bg-white p-4 rounded-lg shadow flex flex-col">
-//                                         <img
-//                                             src={
-//                                                 livre.imageCouverture
-//                                                     ? `http://localhost:5000/${livre.imageCouverture}`
-//                                                     : "https://via.placeholder.com/100"
-//                                             }
-//                                             alt={livre.titre}
-//                                             className="w-full h-40 object-cover rounded mb-2"
-//                                         />
-//                                         <h3 className="font-bold">{livre.titre}</h3>
-//                                         <p className="text-gray-600">Auteur: {livre.auteur || "Inconnu"}</p>
-//                                         <p className="text-gray-600">Pages: {livre.pages || "N/A"}</p>
-
-//                                         <div className="mt-3 flex gap-2">
-//                                             <button
-//                                                 onClick={() => setLivreSelectionne(livre)}
-//                                                 className="flex-1 bg-blue-500 text-white py-1 rounded hover:bg-blue-600 transition"
-//                                             >
-//                                                 Voir
-//                                             </button>
-//                                             <button
-//                                                 onClick={() => navigate(`/livres/modifier/${livre._id}`)}
-//                                                 className="flex-1 bg-yellow-500 text-white py-1 rounded hover:bg-yellow-600 transition"
-//                                             >
-//                                                 Modifier
-//                                             </button>
-//                                             <button
-//                                                 onClick={async () => {
-//                                                     if (window.confirm(`Supprimer le livre "${livre.titre}" ?`)) {
-//                                                         try {
-//                                                             const res = await fetch(`${API_URL_LIVRES}/${livre._id}`, {
-//                                                                 method: "DELETE",
-//                                                                 headers: {
-//                                                                     "Content-Type": "application/json",
-//                                                                     Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                                                                 },
-//                                                             });
-//                                                             if (res.ok) {
-//                                                                 setLivres(livres.filter((l) => l._id !== livre._id));
-//                                                                 alert("Livre supprimé !");
-//                                                             } else {
-//                                                                 alert("Erreur lors de la suppression");
-//                                                             }
-//                                                         } catch (err) {
-//                                                             console.error(err);
-//                                                             alert("Erreur lors de la suppression");
-//                                                         }
-//                                                     }
-//                                                 }}
-//                                                 className="flex-1 bg-red-500 text-white py-1 rounded hover:bg-red-600 transition"
-//                                             >
-//                                                 Supprimer
-//                                             </button>
-//                                         </div>
-//                                     </div>
-//                                 ))}
-//                             </div>
-
-//                             {/* Modal détail livre */}
-//                             {livreSelectionne && (
-//                                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-20 z-50 overflow-auto">
-//                                     <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 p-6 relative">
-//                                         <button
-//                                             onClick={() => setLivreSelectionne(null)}
-//                                             className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 font-bold text-lg"
-//                                         >
-//                                             ✖
-//                                         </button>
-
-//                                         <div className="flex flex-col lg:flex-row gap-6">
-//                                             <div className="flex-shrink-0 w-full lg:w-1/3 h-80 flex items-center justify-center bg-gray-200 rounded-lg">
-//                                                 {livreSelectionne.imageCouverture ? (
-//                                                     <img
-//                                                         src={`http://localhost:5000/${livreSelectionne.imageCouverture}`}
-//                                                         alt={livreSelectionne.titre}
-//                                                         className="max-h-full w-auto object-contain rounded-lg"
-//                                                     />
-//                                                 ) : (
-//                                                     <div className="text-6xl text-gray-500">📚</div>
-//                                                 )}
-//                                             </div>
-
-//                                             <div className="flex-1 flex flex-col justify-between">
-//                                                 <div>
-//                                                     <h1 className="text-2xl font-bold mb-2">{livreSelectionne.titre}</h1>
-//                                                     <p className="text-sm font-semibold mb-1">{livreSelectionne.auteur}</p>
-//                                                     {livreSelectionne.coauteurs && (
-//                                                         <p className="text-sm text-gray-600 mb-1">
-//                                                             Co-auteurs: {livreSelectionne.coauteurs}
-//                                                         </p>
-//                                                     )}
-//                                                     <p className="text-sm text-gray-700 mb-2">{livreSelectionne.description}</p>
-//                                                 </div>
-
-//                                                 {livreSelectionne.documentLivre && (
-//                                                     <iframe
-//                                                         src={`http://localhost:5000/${livreSelectionne.documentLivre}`}
-//                                                         className="w-full rounded-lg mt-4"
-//                                                         style={{ height: "50vh", border: "none" }}
-//                                                         title="Lecteur PDF"
-//                                                     />
-//                                                 )}
-//                                             </div>
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             )}
-//                         </div>
-//                     )}
-
-//                     {activeMenu === "auteurs" && (
-//             <div className="bg-white p-6 rounded-lg shadow-xl">
-//               <h2 className="text-2xl font-bold mb-4">Gestion des auteurs</h2>
-//               <p className="text-sm text-gray-500 mb-6">
-//                 (Note: Seuls les auteurs approuvés sont affichés, comme spécifié dans votre route backend.)
-//               </p>
-
-//               {loadingAuteurs ? (
-//                 <div className="text-center py-10 text-gray-500">Chargement des auteurs...</div>
-//               ) : (
-//                 <>
-//                   <div className="overflow-x-auto rounded-lg shadow-md">
-//                     <table className="min-w-full bg-white border-collapse">
-//                       <thead className="bg-gray-200">
-//                         <tr>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Nro</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Auteur</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Statut</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Genres</th>
-//                           {/* ✅ Nouvelle colonne */}
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Livres</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Revenus</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Inscrit le</th>
-//                           <th className="py-3 px-4 text-left font-semibold text-gray-600">Action</th>
-//                         </tr>
-//                       </thead>
-//                       <tbody>
-//                         {auteurs.length > 0 ? (
-//                           auteurs.map((auteur, index) => (
-//                             <tr key={auteur._id} className="border-b last:border-0 hover:bg-gray-50">
-//                               <td className="py-3 px-4">
-//                                 {index + 1 + (currentPage - 1) * itemsPerPage}
-//                               </td>
-//                               <td className="py-3 px-4">
-//                                 <div className="flex items-center gap-3">
-//                                   <img
-//                                     src={auteur.imageProfil ? `http://localhost:5000/${auteur.imageProfil}` : "https://via.placeholder.com/40"}
-//                                     alt={auteur.prenoms}
-//                                     className="w-10 h-10 rounded-full object-cover"
-//                                   />
-//                                   <span className="font-medium text-gray-800">
-//                                     {auteur.prenoms} {auteur.nom}
-//                                   </span>
-//                                 </div>
-//                               </td>
-//                               <td className="py-3 px-4 text-gray-600">{auteur.email}</td>
-//                               <td className="py-3 px-4">
-//                                 <span
-//                                   className="px-3 py-1 text-xs font-bold rounded-full bg-green-200 text-green-800"
-//                                 >
-//                                   {auteur.statut}
-//                                 </span>
-//                               </td>
-//                               <td className="py-3 px-4 text-gray-600">{auteur.genrePrefere || 'N/A'}</td>
-//                               {/* ✅ Nouvelle cellule */}
-//                               <td className="py-3 px-4 text-gray-600 font-semibold">{auteur.nombreDeLivres}</td>
-//                               <td className="py-3 px-4 font-semibold text-gray-700">{auteur.revenus} FG</td>
-//                               <td className="py-3 px-4 text-gray-600">
-//                                 {auteur.dateCreation ? new Date(auteur.dateCreation).toLocaleDateString("fr-FR", {
-//                                   day: "numeric",
-//                                   month: "short",
-//                                   year: "numeric",
-//                                 }) : 'N/A'}
-//                               </td>
-//                               <td className="py-3 px-4 flex gap-2">
-//                                 <button
-//                                   className="text-blue-600 hover:text-blue-800 font-semibold"
-//                                   onClick={() => {
-//                                     alert(`Voir les détails de ${auteur.prenoms} ${auteur.nom}`);
-//                                   }}
-//                                 >
-//                                   Voir
-//                                 </button>
-//                               </td>
-//                             </tr>
-//                           ))
-//                         ) : (
-//                           <tr>
-//                             <td colSpan="9" className="text-center py-6 text-gray-500">
-//                               Aucun auteur trouvé.
-//                             </td>
-//                           </tr>
-//                         )}
-//                       </tbody>
-//                     </table>
-//                   </div>
-
-//                                     {/* Pagination */}
-//                                     {totalAuteurs > 0 && (
-//                                         <div className="flex justify-between items-center mt-6">
-//                                             <span className="text-sm text-gray-600">
-//                                                 Résultats {(currentPage - 1) * itemsPerPage + 1} -{" "}
-//                                                 {Math.min(currentPage * itemsPerPage, totalAuteurs)} sur {totalAuteurs}
-//                                             </span>
-//                                             <div className="flex gap-2">
-//                                                 <button
-//                                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-//                                                     disabled={currentPage === 1}
-//                                                     className="px-4 py-2 border rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-//                                                 >
-//                                                     Préc
-//                                                 </button>
-//                                                 {[...Array(totalPages)].map((_, i) => (
-//                                                     <button
-//                                                         key={i + 1}
-//                                                         onClick={() => setCurrentPage(i + 1)}
-//                                                         className={`px-4 py-2 border rounded-lg transition-all ${currentPage === i + 1
-//                                                                 ? "bg-purple-600 text-white"
-//                                                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-//                                                             }`}
-//                                                     >
-//                                                         {i + 1}
-//                                                     </button>
-//                                                 ))}
-//                                                 <button
-//                                                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-//                                                     disabled={currentPage === totalPages}
-//                                                     className="px-4 py-2 border rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-//                                                 >
-//                                                     Suiv
-//                                                 </button>
-//                                             </div>
-//                                         </div>
-//                                     )}
-//                                 </>
-//                             )}
-//                         </div>
-//                     )}
-//                 </div>
-//             </main>
-//         </div>
-//     );
-// }
-
-// export default DashboardAdmin;
-
-// import React, { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// // ✅ Constantes pour les routes API
-// const API_URL_LIVRES = "http://localhost:5000/api/livres";
-// const API_URL_AUTEURS = "http://localhost:5000/api/auteurs";
-// const API_URL_USERS = "http://localhost:5000/api/users";
-
-// function DashboardAdmin() {
-//     const [activeMenu, setActiveMenu] = useState("vue-ensemble");
-//     const [adminName, setAdminName] = useState("");
-//     const [livres, setLivres] = useState([]);
-//     const [livreSelectionne, setLivreSelectionne] = useState(null);
-
-//     // ✅ États pour la gestion des auteurs
-//     const [auteurs, setAuteurs] = useState([]);
-//     const [totalAuteurs, setTotalAuteurs] = useState(0);
-//     const [currentPage, setCurrentPage] = useState(1);
-//     const [itemsPerPage] = useState(8); // S'aligne avec le backend
-//     const [loadingAuteurs, setLoadingAuteurs] = useState(true);
-
-//     // Utilisateurs
-//     const [utilisateurs, setUtilisateurs] = useState([]);
-//     const [loadingUtilisateurs, setLoadingUtilisateurs] = useState(true);
-
-//     const navigate = useNavigate();
-
-//     // --- Récupération du nom de l'admin ---
-//     useEffect(() => {
-//         const token = localStorage.getItem("token");
-//         if (token) {
-//             try {
-//                 const payload = JSON.parse(atob(token.split(".")[1]));
-//                 setAdminName(payload.user?.email || "Admin");
-//             } catch (err) {
-//                 console.error("Erreur décodage token:", err);
-//                 setAdminName("Admin");
-//             }
-//         }
-//     }, []);
-
-//     // --- Récupération des utilisateurs ---
-//     useEffect(() => {
-//         const fetchUtilisateurs = async () => {
-//             setLoadingUtilisateurs(true);
-//             try {
-//                 const res = await fetch(API_URL_USERS, {
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                     },
-//                 });
-//                 if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-//                 const data = await res.json();
-//                 setUtilisateurs(Array.isArray(data) ? data : []);
-//             } catch (err) {
-//                 console.error("Erreur fetch utilisateurs:", err);
-//                 setUtilisateurs([]);
-//             } finally {
-//                 setLoadingUtilisateurs(false);
-//             }
-//         };
-
-//         fetchUtilisateurs();
-//     }, []);
-
-
-//     // --- Récupération des livres ---
-//     useEffect(() => {
-//         const fetchLivres = async () => {
-//             try {
-//                 const res = await fetch(API_URL_LIVRES, {
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                     },
-//                 });
-//                 if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-//                 const data = await res.json();
-//                 setLivres(Array.isArray(data) ? data : []);
-//             } catch (err) {
-//                 console.error("Erreur fetch livres:", err);
-//             }
-//         };
-//         fetchLivres();
-//     }, []);
-
-//     // --- Récupération des auteurs avec pagination ---
-//     useEffect(() => {
-//         const fetchAuteurs = async () => {
-//             setLoadingAuteurs(true);
-//             try {
-//                 // Envoie les paramètres de pagination au backend
-//                 const res = await fetch(`${API_URL_AUTEURS}?page=${currentPage}&limit=${itemsPerPage}`, {
-//                     headers: {
-//                         "Content-Type": "application/json",
-//                         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                     },
-//                 });
-//                 if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-//                 const data = await res.json();
-//                 setAuteurs(Array.isArray(data.auteurs) ? data.auteurs : []);
-//                 setTotalAuteurs(data.total);
-//             } catch (err) {
-//                 console.error("Erreur fetch auteurs:", err);
-//                 setAuteurs([]);
-//             } finally {
-//                 setLoadingAuteurs(false);
-//             }
-//         };
-//         fetchAuteurs();
-//     }, [currentPage, itemsPerPage]); // Déclenche la requête à chaque changement de page
-
-//     // --- Fonctions d'action ---
-//     const handleLogout = () => {
-//         localStorage.removeItem("token");
-//         navigate("/");
-//     };
-
-//     const handleRetour = () => {
-//         navigate("/");
-//     };
-
-//     // ✅ Logique de mise à jour du statut
-//     const handleUpdateStatus = async (auteurId, newStatus) => {
-//         try {
-//             const res = await fetch(`${API_URL_AUTEURS}/${auteurId}/statut`, {
-//                 method: "PATCH",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                     Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                 },
-//                 body: JSON.stringify({ statut: newStatus }),
-//             });
-//             if (!res.ok) throw new Error("Erreur lors de la mise à jour du statut");
-//             alert("Statut mis à jour !");
-//             setCurrentPage(1);
-//         } catch (err) {
-//             console.error("Erreur mise à jour statut:", err);
-//             alert("Erreur lors de la mise à jour du statut");
-//         }
-//     };
-
-//     const totalPages = Math.ceil(totalAuteurs / itemsPerPage);
-
-//     const menuItems = [
-//         { key: "vue-ensemble", label: "Vue d'ensemble" },
-//         { key: "livres", label: "Livres" },
-//         { key: "auteurs", label: "Auteurs" },
-//         { key: "utilisateurs", label: "Utilisateurs" },
-//         { key: "abonnements", label: "Abonnements" },
-//         { key: "revenus", label: "Revenus" },
-//         { key: "parametres", label: "Paramètres" },
-//     ];
-
-//     return (
-//         <div className="flex min-h-screen">
-//             {/* Barre latérale */}
-//             <aside className="w-64 bg-[#160216] flex flex-col justify-between p-6 rounded-l-lg shadow-lg">
-//                 <div>
-//                     <h2 className="text-2xl font-bold mb-6 text-white">Admin Dashboard</h2>
-//                     <ul className="flex flex-col gap-2">
-//                         {menuItems.map((item) => (
-//                             <li
-//                                 key={item.key}
-//                                 onClick={() => setActiveMenu(item.key)}
-//                                 className={`cursor-pointer px-4 py-2 rounded-md transition-all font-semibold ${activeMenu === item.key
-//                                     ? "bg-white text-[#160216]"
-//                                     : "bg-[#160216] text-white hover:bg-white hover:text-[#160216]"
-//                                     }`}
-//                             >
-//                                 {item.label}
-//                             </li>
-//                         ))}
-//                     </ul>
-//                 </div>
-//                 <div className="flex flex-col gap-2">
-//                     <button
-//                         onClick={handleLogout}
-//                         className="w-full bg-[#ff0000] text-white py-2 rounded hover:bg-[#cc0000] transition"
-//                     >
-//                         Déconnexion
-//                     </button>
-//                     <button
-//                         onClick={handleRetour}
-//                         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-//                     >
-//                         Retour sur la plateforme
-//                     </button>
-//                 </div>
-//             </aside>
-
-//             {/* Contenu principal */}
-//             <main className="flex-1 flex flex-col bg-[#DEDEDE]">
-//                 {/* Barre supérieure */}
-//                 <div className="mx-6 my-6 p-6 bg-[#F5F5F5] border border-gray-400 rounded-xl shadow-sm flex justify-between items-center">
-//                     <h1 className="text-3xl font-bold text-gray-800">Tableau de bord</h1>
-//                     <div className="flex items-center gap-4">
-//                         <button className="relative">
-//                             <svg
-//                                 xmlns="http://www.w3.org/2000/svg"
-//                                 className="h-6 w-6 text-gray-800"
-//                                 fill="none"
-//                                 viewBox="0 0 24 24"
-//                                 stroke="currentColor"
-//                             >
-//                                 <path
-//                                     strokeLinecap="round"
-//                                     strokeLinejoin="round"
-//                                     strokeWidth="2"
-//                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-5M9 17H4l1.405-1.405A2.032 2.032 0 006 14.158V11a6 6 0 0112 0v3.159c0 .538.214 1.055.595 1.436L20 17h-5m-4 0v1a3 3 0 006 0v-1m-6 0h6"
-//                                 />
-//                             </svg>
-//                             <span className="absolute top-0 right-0 h-2 w-2 bg-red-600 rounded-full"></span>
-//                         </button>
-
-//                         <div className="flex items-center gap-2 bg-white p-2 rounded-full">
-//                             <img
-//                                 src="https://via.placeholder.com/40"
-//                                 alt="Profil"
-//                                 className="w-10 h-10 rounded-full"
-//                             />
-//                             <span className="font-medium text-gray-800">{adminName}</span>
-//                         </div>
-//                     </div>
-//                 </div>
-
-//                 {/* Cartes de stats */}
-//                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-6">
-//                     {/* Abonnés */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Abonnés</h3>
-//                             <p className="text-2xl font-semibold">120</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Livres publiés */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Livres publiés</h3>
-//                             <p className="text-xl font-semibold">{livres.length}</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Auteurs */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Auteurs</h3>
-//                             <p className="text-xl font-semibold">{totalAuteurs}</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Livres lus 75% */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Livres lus (75%)</h3>
-//                             <p className="text-xl font-semibold">80</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Revenus */}
-//                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
-//                         <div>
-//                             <h3 className="text-base font-bold text-gray-500">Revenus</h3>
-//                         </div>
-//                     </div>
-//                 </div>
-
-//                 {/* Sections */}
-//                 <div className="flex-1 p-8">
-//                     {activeMenu === "vue-ensemble" && (
-//                         <div>
-//                             <h2 className="text-xl font-semibold mb-4">Vue d'ensemble</h2>
-//                             <p>Statistiques globales : utilisateurs, livres, abonnements, revenus...</p>
-//                         </div>
-//                     )}
-
-//                     {activeMenu === "livres" && (
-//                         <div>
-//                             <h2 className="text-xl font-semibold mb-4">Gestion des livres</h2>
-//                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-//                                 {livres.map((livre) => (
-//                                     <div key={livre._id} className="bg-white p-4 rounded-lg shadow flex flex-col">
-//                                         <img
-//                                             src={
-//                                                 livre.imageCouverture
-//                                                     ? `http://localhost:5000/${livre.imageCouverture}`
-//                                                     : "https://via.placeholder.com/100"
-//                                             }
-//                                             alt={livre.titre}
-//                                             className="w-full h-40 object-cover rounded mb-2"
-//                                         />
-//                                         <h3 className="font-bold">{livre.titre}</h3>
-//                                         <p className="text-gray-600">Auteur: {livre.auteur || "Inconnu"}</p>
-//                                         <p className="text-gray-600">Pages: {livre.pages || "N/A"}</p>
-
-//                                         <div className="mt-3 flex gap-2">
-//                                             <button
-//                                                 onClick={() => setLivreSelectionne(livre)}
-//                                                 className="flex-1 bg-blue-500 text-white py-1 rounded hover:bg-blue-600 transition"
-//                                             >
-//                                                 Voir
-//                                             </button>
-//                                             <button
-//                                                 onClick={() => navigate(`/livres/modifier/${livre._id}`)}
-//                                                 className="flex-1 bg-yellow-500 text-white py-1 rounded hover:bg-yellow-600 transition"
-//                                             >
-//                                                 Modifier
-//                                             </button>
-//                                             <button
-//                                                 onClick={async () => {
-//                                                     if (window.confirm(`Supprimer le livre "${livre.titre}" ?`)) {
-//                                                         try {
-//                                                             const res = await fetch(`${API_URL_LIVRES}/${livre._id}`, {
-//                                                                 method: "DELETE",
-//                                                                 headers: {
-//                                                                     "Content-Type": "application/json",
-//                                                                     Authorization: `Bearer ${localStorage.getItem("token")}`,
-//                                                                 },
-//                                                             });
-//                                                             if (res.ok) {
-//                                                                 setLivres(livres.filter((l) => l._id !== livre._id));
-//                                                                 alert("Livre supprimé !");
-//                                                             } else {
-//                                                                 alert("Erreur lors de la suppression");
-//                                                             }
-//                                                         } catch (err) {
-//                                                             console.error(err);
-//                                                             alert("Erreur lors de la suppression");
-//                                                         }
-//                                                     }
-//                                                 }}
-//                                                 className="flex-1 bg-red-500 text-white py-1 rounded hover:bg-red-600 transition"
-//                                             >
-//                                                 Supprimer
-//                                             </button>
-//                                         </div>
-//                                     </div>
-//                                 ))}
-//                             </div>
-
-//                             {/* Modal détail livre */}
-//                             {livreSelectionne && (
-//                                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-20 z-50 overflow-auto">
-//                                     <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 p-6 relative">
-//                                         <button
-//                                             onClick={() => setLivreSelectionne(null)}
-//                                             className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 font-bold text-lg"
-//                                         >
-//                                             ✖
-//                                         </button>
-
-//                                         <div className="flex flex-col lg:flex-row gap-6">
-//                                             <div className="flex-shrink-0 w-full lg:w-1/3 h-80 flex items-center justify-center bg-gray-200 rounded-lg">
-//                                                 {livreSelectionne.imageCouverture ? (
-//                                                     <img
-//                                                         src={`http://localhost:5000/${livreSelectionne.imageCouverture}`}
-//                                                         alt={livreSelectionne.titre}
-//                                                         className="max-h-full w-auto object-contain rounded-lg"
-//                                                     />
-//                                                 ) : (
-//                                                     <div className="text-6xl text-gray-500">📚</div>
-//                                                 )}
-//                                             </div>
-
-//                                             <div className="flex-1 flex flex-col justify-between">
-//                                                 <div>
-//                                                     <h1 className="text-2xl font-bold mb-2">{livreSelectionne.titre}</h1>
-//                                                     <p className="text-sm font-semibold mb-1">{livreSelectionne.auteur}</p>
-//                                                     {livreSelectionne.coauteurs && (
-//                                                         <p className="text-sm text-gray-600 mb-1">
-//                                                             Co-auteurs: {livreSelectionne.coauteurs}
-//                                                         </p>
-//                                                     )}
-//                                                     <p className="text-sm text-gray-700 mb-2">{livreSelectionne.description}</p>
-//                                                 </div>
-
-//                                                 {livreSelectionne.documentLivre && (
-//                                                     <iframe
-//                                                         src={`http://localhost:5000/${livreSelectionne.documentLivre}`}
-//                                                         className="w-full rounded-lg mt-4"
-//                                                         style={{ height: "50vh", border: "none" }}
-//                                                         title="Lecteur PDF"
-//                                                     />
-//                                                 )}
-//                                             </div>
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             )}
-//                         </div>
-//                     )}
-
-//                     {activeMenu === "auteurs" && (
-//                         <div className="bg-white p-6 rounded-lg shadow-xl">
-//                             <h2 className="text-2xl font-bold mb-4">Gestion des auteurs</h2>
-//                             <p className="text-sm text-gray-500 mb-6">
-//                                 (Note: Seuls les auteurs approuvés sont affichés, comme spécifié dans votre route backend.)
-//                             </p>
-
-//                             {loadingAuteurs ? (
-//                                 <div className="text-center py-10 text-gray-500">Chargement des auteurs...</div>
-//                             ) : (
-//                                 <>
-//                                     <div className="overflow-x-auto rounded-lg shadow-md">
-//                                         <table className="min-w-full bg-white border-collapse">
-//                                             <thead className="bg-gray-200">
-//                                                 <tr>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Nro</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Auteur</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Statut</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Genres</th>
-//                                                     {/* ✅ Nouvelle colonne */}
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Livres</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Revenus</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Inscrit le</th>
-//                                                     <th className="py-3 px-4 text-left font-semibold text-gray-600">Action</th>
-//                                                 </tr>
-//                                             </thead>
-//                                             <tbody>
-//                                                 {auteurs.length > 0 ? (
-//                                                     auteurs.map((auteur, index) => (
-//                                                         <tr key={auteur._id} className="border-b last:border-0 hover:bg-gray-50">
-//                                                             <td className="py-3 px-4">
-//                                                                 {index + 1 + (currentPage - 1) * itemsPerPage}
-//                                                             </td>
-//                                                             <td className="py-3 px-4">
-//                                                                 <div className="flex items-center gap-3">
-//                                                                     <img
-//                                                                         src={auteur.imageProfil ? `http://localhost:5000/${auteur.imageProfil}` : "https://via.placeholder.com/40"}
-//                                                                         alt={auteur.prenoms}
-//                                                                         className="w-10 h-10 rounded-full object-cover"
-//                                                                     />
-//                                                                     <span className="font-medium text-gray-800">
-//                                                                         {auteur.prenoms} {auteur.nom}
-//                                                                     </span>
-//                                                                 </div>
-//                                                             </td>
-//                                                             <td className="py-3 px-4 text-gray-600">{auteur.email}</td>
-//                                                             <td className="py-3 px-4">
-//                                                                 <span
-//                                                                     className="px-3 py-1 text-xs font-bold rounded-full bg-green-200 text-green-800"
-//                                                                 >
-//                                                                     {auteur.statut}
-//                                                                 </span>
-//                                                             </td>
-//                                                             <td className="py-3 px-4 text-gray-600">{auteur.genrePrefere || 'N/A'}</td>
-//                                                             {/* ✅ Nouvelle cellule */}
-//                                                             <td className="py-3 px-4 text-gray-600 font-semibold">
-//                                                                 {auteur.nombreDeLivres ?? 0}
-//                                                             </td>
-
-//                                                             <td className="py-3 px-4 font-semibold text-gray-700">{auteur.revenus} FG</td>
-//                                                             <td className="py-3 px-4 text-gray-600">
-//                                                                 {auteur.dateCreation ? new Date(auteur.dateCreation).toLocaleDateString("fr-FR", {
-//                                                                     day: "numeric",
-//                                                                     month: "short",
-//                                                                     year: "numeric",
-//                                                                 }) : 'N/A'}
-//                                                             </td>
-//                                                             <td className="py-3 px-4 flex gap-2">
-//                                                                 <button
-//                                                                     className="text-blue-600 hover:text-blue-800 font-semibold"
-//                                                                     onClick={() => {
-//                                                                         alert(`Voir les détails de ${auteur.prenoms} ${auteur.nom}`);
-//                                                                     }}
-//                                                                 >
-//                                                                     Voir
-//                                                                 </button>
-//                                                             </td>
-//                                                         </tr>
-//                                                     ))
-//                                                 ) : (
-//                                                     <tr>
-//                                                         <td colSpan="9" className="text-center py-6 text-gray-500">
-//                                                             Aucun auteur trouvé.
-//                                                         </td>
-//                                                     </tr>
-//                                                 )}
-//                                             </tbody>
-//                                         </table>
-//                                     </div>
-
-//                                     {/* Pagination */}
-//                                     {totalAuteurs > 0 && (
-//                                         <div className="flex justify-between items-center mt-6">
-//                                             <span className="text-sm text-gray-600">
-//                                                 Résultats {(currentPage - 1) * itemsPerPage + 1} -{" "}
-//                                                 {Math.min(currentPage * itemsPerPage, totalAuteurs)} sur {totalAuteurs}
-//                                             </span>
-//                                             <div className="flex gap-2">
-//                                                 <button
-//                                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-//                                                     disabled={currentPage === 1}
-//                                                     className="px-4 py-2 border rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-//                                                 >
-//                                                     Préc
-//                                                 </button>
-//                                                 {[...Array(totalPages)].map((_, i) => (
-//                                                     <button
-//                                                         key={i + 1}
-//                                                         onClick={() => setCurrentPage(i + 1)}
-//                                                         className={`px-4 py-2 border rounded-lg transition-all ${currentPage === i + 1
-//                                                             ? "bg-purple-600 text-white"
-//                                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-//                                                             }`}
-//                                                     >
-//                                                         {i + 1}
-//                                                     </button>
-//                                                 ))}
-//                                                 <button
-//                                                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-//                                                     disabled={currentPage === totalPages}
-//                                                     className="px-4 py-2 border rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-//                                                 >
-//                                                     Suiv
-//                                                 </button>
-//                                             </div>
-//                                         </div>
-//                                     )}
-//                                 </>
-//                             )}
-//                         </div>
-//                     )}
-
-//                     {activeMenu === "utilisateurs" && (
-//                         <div className="bg-white p-6 rounded-lg shadow-xl">
-//                             <h2 className="text-2xl font-bold mb-4">Liste des utilisateurs</h2>
-//                             {loadingUtilisateurs ? (
-//                                 <p className="text-gray-500">Chargement...</p>
-//                             ) : utilisateurs.length > 0 ? (
-//                                 <div className="overflow-x-auto rounded-lg shadow-md">
-//                                     <table className="min-w-full bg-white border-collapse">
-//                                         <thead className="bg-gray-200">
-//                                             <tr>
-//                                                 <th className="py-3 px-4 text-left font-semibold text-gray-600">N°</th>
-//                                                 <th className="py-3 px-4 text-left font-semibold text-gray-600">Nom complet</th>
-//                                                 <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
-//                                                 <th className="py-3 px-4 text-left font-semibold text-gray-600">Statut</th>
-//                                                 <th className="py-3 px-4 text-left font-semibold text-gray-600">Inscrit le</th>
-//                                             </tr>
-//                                         </thead>
-//                                         <tbody>
-//                                             {utilisateurs.map((user, index) => (
-//                                                 <tr key={user._id} className="border-b last:border-0 hover:bg-gray-50">
-//                                                     <td className="py-3 px-4">{index + 1}</td>
-//                                                     <td className="py-3 px-4">{user.prenoms} {user.nom}</td>
-//                                                     <td className="py-3 px-4">{user.email}</td>
-//                                                     <td className="py-3 px-4">
-//                                                         <span className={`px-3 py-1 text-xs font-bold rounded-full ${user.estApprouve ? "bg-green-200 text-green-800" : "bg-gray-200 text-gray-800"}`}>
-//                                                             {user.estApprouve ? "Approuvé" : "En attente"}
-//                                                         </span>
-//                                                     </td>
-//                                                     <td className="py-3 px-4">{new Date(user.dateCreation).toLocaleDateString("fr-FR")}</td>
-//                                                 </tr>
-//                                             ))}
-//                                         </tbody>
-//                                     </table>
-//                                 </div>
-//                             ) : (
-//                                 <p className="text-gray-500">Aucun utilisateur trouvé.</p>
-//                             )}
-//                         </div>
-//                     )}
-
-//                 </div>
-//             </main>
-//         </div>
-//     );
-// }
-
-// export default DashboardAdmin;
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { getLivresByAuteurId } from "../services/LivreService";
 
 // ✅ Constantes pour les routes API
 const API_URL_LIVRES = "http://localhost:5000/api/livres";
@@ -1095,6 +14,8 @@ function DashboardAdmin() {
     const [livres, setLivres] = useState([]);
     const [livreSelectionne, setLivreSelectionne] = useState(null);
     const [actualiteSelectionnee, setActualiteSelectionnee] = useState(null);
+    const [auteurSelectionnePourLivres, setAuteurSelectionnePourLivres] = useState(null);
+    const [livresAuteur, setLivresAuteur] = useState([]);
 
     // ✅ États pour la gestion des actualités
     const [actualites, setActualites] = useState([]);
@@ -1111,6 +32,12 @@ function DashboardAdmin() {
     // Utilisateurs
     const [utilisateurs, setUtilisateurs] = useState([]);
     const [loadingUtilisateurs, setLoadingUtilisateurs] = useState(true);
+    const [totalUtilisateurs, setTotalUtilisateurs] = useState(0);
+    const [currentPageUsers, setCurrentPageUsers] = useState(1);
+    const [userSelectionne, setUserSelectionne] = useState(null); // Pour la modale "Voir"
+    const [filtreRole, setFiltreRole] = useState(null); // Filtre par rôle
+    const [filtreStatut, setFiltreStatut] = useState(null); // Filtre par statut
+    const [userStats, setUserStats] = useState({ total: 0, parRole: {}, parStatut: {} });
 
     const navigate = useNavigate();
 
@@ -1128,30 +55,69 @@ function DashboardAdmin() {
         }
     }, []);
 
+    const fetchUtilisateurs = useCallback(async () => {
+        setLoadingUtilisateurs(true);
+        let url = `${API_URL_USERS}?page=${currentPageUsers}&limit=${itemsPerPage}`;
+        if (filtreRole) {
+            url += `&role=${filtreRole}`;
+        }
+        if (filtreStatut) {
+            url += `&statut=${filtreStatut}`;
+        }
+
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+            const { utilisateurs, total } = await res.json();
+            // Si la page actuelle est vide mais qu'il y a des résultats, on revient à la page 1
+            if (utilisateurs.length === 0 && total > 0 && currentPageUsers > 1) {
+                setCurrentPageUsers(1);
+            }
+            setUtilisateurs(Array.isArray(utilisateurs) ? utilisateurs : []);
+            setTotalUtilisateurs(total);
+        } catch (err) {
+            console.error("Erreur fetch utilisateurs:", err);
+            setUtilisateurs([]);
+        } finally {
+            setLoadingUtilisateurs(false);
+        }
+    }, [currentPageUsers, itemsPerPage, filtreRole, filtreStatut]);
+
     // --- Récupération des utilisateurs ---
     useEffect(() => {
-        const fetchUtilisateurs = async () => {
-            setLoadingUtilisateurs(true);
+        fetchUtilisateurs();
+    }, [fetchUtilisateurs]); // Se déclenche quand la page des utilisateurs change
+
+    // --- Récupération des statistiques des utilisateurs ---
+    useEffect(() => {
+        const fetchUserStats = async () => {
             try {
-                const res = await fetch(API_URL_USERS, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
+                const res = await fetch(`${API_URL_USERS}/stats`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
-                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                if (!res.ok) throw new Error("Erreur stats");
                 const data = await res.json();
-                setUtilisateurs(Array.isArray(data) ? data : []);
+                setUserStats({
+                    total: data.total || 0,
+                    parRole: data.parRole.reduce((acc, item) => ({ ...acc, [item._id]: item.count }), {}),
+                    parStatut: data.parStatut.reduce((acc, item) => ({ ...acc, [item._id ? 'approuve' : 'en_attente']: item.count }), {}),
+                });
             } catch (err) {
-                console.error("Erreur fetch utilisateurs:", err);
-                setUtilisateurs([]);
-            } finally {
-                setLoadingUtilisateurs(false);
+                console.error("Erreur fetch stats utilisateurs:", err);
             }
         };
+        // On ne charge les stats que lorsque l'onglet utilisateur est actif
+        if (activeMenu === 'utilisateurs') {
+            fetchUserStats();
+        }
+    }, [activeMenu]);
 
-        fetchUtilisateurs();
-    }, []);
+
 
     // ... (autres useEffects)
 
@@ -1180,19 +146,7 @@ function DashboardAdmin() {
         fetchActualites();
     }, []); // Le tableau de dépendances vide assure un seul appel
 
-    // Ajoutez cet useEffect après la récupération des actualités
-    // useEffect(() => {
-    //     if (actualites.length > 0) {
-    //         const counts = actualites.reduce((acc, actualite) => {
-    //             const categorie = actualite.categorie || 'Non catégorisée'; // Assurez-vous que l'objet actualité a bien une propriété 'categorie'
-    //             acc[categorie] = (acc[categorie] || 0) + 1;
-    //             return acc;
-    //         }, {});
-    //         setActualiteCounts(counts);
-    //     }
-    // }, [actualites]);
-
-    // ... (autres fonctions)
+    
 
 
     // --- Récupération des livres ---
@@ -1242,13 +196,136 @@ function DashboardAdmin() {
     }, [currentPage, itemsPerPage]); // Déclenche la requête à chaque changement de page
 
     // --- Fonctions d'action ---
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/");
+    const handleLogout = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch("http://localhost:5000/api/auth/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                console.log("Déconnexion réussie côté serveur.");
+            } else {
+                console.warn("Échec de la déconnexion côté serveur, mais le client sera déconnecté.");
+            }
+        } catch (error) {
+            console.error("Erreur lors de la déconnexion du serveur:", error);
+        } finally {
+            localStorage.removeItem("token");
+            navigate("/"); // Redirige vers l'accueil après la déconnexion
+        }
     };
 
     const handleRetour = () => {
         navigate("/");
+    };
+
+    // ✅ Fonctions pour la gestion des utilisateurs (à implémenter)
+const handleApproveUser = async (userId) => {
+    if (window.confirm("Êtes-vous sûr de vouloir approuver cet utilisateur ?")) {
+        try {
+            const res = await fetch(`${API_URL_USERS}/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ estApprouve: true }),
+            });
+            if (!res.ok) throw new Error("Erreur lors de l'approbation");
+            alert("Utilisateur approuvé avec succès !");
+            // Rafraîchir la liste en forçant le re-fetch
+            if (currentPageUsers === 1) {
+                fetchUtilisateurs();
+            } else {
+                setCurrentPageUsers(1);
+            }
+        } catch (err) {
+            console.error("Erreur d'approbation:", err);
+            alert("Une erreur est survenue lors de l'approbation.");
+        }
+    }
+};
+
+const handleVoirUser = async (userId) => {
+    try {
+        const res = await fetch(`${API_URL_USERS}/${userId}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) throw new Error("Utilisateur non trouvé");
+        const data = await res.json();
+        setUserSelectionne(data.user); // Ouvre la modale avec les données de l'utilisateur
+    } catch (err) {
+        console.error("Erreur de visualisation:", err);
+        alert("Impossible de récupérer les détails de l'utilisateur.");
+    }
+};
+
+const handleModifierUser = (userId) => {
+    // Redirige vers le formulaire de modification avec l'ID de l'utilisateur
+    navigate(`/modifier-utilisateur/${userId}`);
+};
+
+const handleDeleteUser = async (userId) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.")) {
+        const res = await fetch(`${API_URL_USERS}/${userId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (res.ok) {
+            alert("Utilisateur supprimé avec succès.");
+            // Rafraîchir la liste en forçant le re-fetch
+            if (currentPageUsers === 1) {
+                fetchUtilisateurs();
+            } else {
+                setCurrentPageUsers(1);
+            }
+        } else {
+            alert("Erreur lors de la suppression.");
+        }
+    }
+};
+
+    const handleFermerUserModal = () => {
+        setUserSelectionne(null);
+    };
+
+    const handleVoirLivresAuteur = async (auteur) => {
+        setAuteurSelectionnePourLivres(auteur);
+        setLivresAuteur([]); // Vider la liste précédente
+        try {
+            const data = await getLivresByAuteurId(auteur._id);
+            if (data && data.livres) {
+                setLivresAuteur(data.livres);
+            }
+        } catch (err) {
+            console.error("Erreur lors de la récupération des livres de l'auteur:", err);
+            alert("Impossible de charger les livres de cet auteur.");
+            setAuteurSelectionnePourLivres(null);
+        }
+    };
+
+    const handleFermerModalLivresAuteur = () => {
+        setAuteurSelectionnePourLivres(null);
+        setLivresAuteur([]);
+    };
+
+
+
+    const handleFiltreRole = (role) => {
+        setCurrentPageUsers(1); // Revenir à la première page
+        setFiltreRole(role);
+        setFiltreStatut(null); // Réinitialiser l'autre filtre
+    };
+
+    const handleFiltreStatut = (statut) => {
+        setCurrentPageUsers(1);
+        setFiltreStatut(statut);
+        setFiltreRole(null);
     };
 
     // ✅ Logique de mise à jour du statut
@@ -1281,6 +358,7 @@ function DashboardAdmin() {
     };
 
     const totalPages = Math.ceil(totalAuteurs / itemsPerPage);
+    const totalPagesUsers = Math.ceil(totalUtilisateurs / itemsPerPage);
 
     const menuItems = [
         { key: "vue-ensemble", label: "Vue d'ensemble" },
@@ -1294,9 +372,9 @@ function DashboardAdmin() {
     ];
 
     return (
-        <div className="flex min-h-screen">
+        <div className="bg-[#DEDEDE] min-h-screen">
             {/* Barre latérale */}
-            <aside className="w-64 bg-[#160216] flex flex-col justify-between p-6 rounded-l-lg shadow-lg">
+            <aside className="w-64 bg-[#160216] flex flex-col justify-between p-6 shadow-lg fixed top-0 left-0 h-full z-10">
                 <div>
                     <h2 className="text-2xl font-bold mb-6 text-white">Admin Dashboard</h2>
                     <ul className="flex flex-col gap-2">
@@ -1331,7 +409,7 @@ function DashboardAdmin() {
             </aside>
 
             {/* Contenu principal */}
-            <main className="flex-1 flex flex-col bg-[#DEDEDE]">
+            <main className="ml-64 flex-1 flex flex-col"> {/* ml-64 pour décaler le contenu de la largeur de la sidebar */}
                 {/* Barre supérieure */}
                 <div className="mx-6 my-6 p-6 bg-[#F5F5F5] border border-gray-400 rounded-xl shadow-sm flex justify-between items-center">
                     <h1 className="text-3xl font-bold text-gray-800">Tableau de bord</h1>
@@ -1440,7 +518,9 @@ function DashboardAdmin() {
                                             className="w-full h-40 object-cover rounded mb-2"
                                         />
                                         <h3 className="font-bold">{livre.titre}</h3>
-                                        <p className="text-gray-600">Auteur: {livre.auteur || "Inconnu"}</p>
+                                        <p className="text-gray-600">
+                                            Auteur: {livre.auteur ? `${livre.auteur.prenoms} ${livre.auteur.nom}` : "Inconnu"}
+                                        </p>
                                         <p className="text-gray-600">Pages: {livre.pages || "N/A"}</p>
 
                                         <div className="mt-3 flex gap-2">
@@ -1515,7 +595,9 @@ function DashboardAdmin() {
                                             <div className="flex-1 flex flex-col justify-between">
                                                 <div>
                                                     <h1 className="text-2xl font-bold mb-2">{livreSelectionne.titre}</h1>
-                                                    <p className="text-sm font-semibold mb-1">{livreSelectionne.auteur}</p>
+                                                    <p className="text-sm font-semibold mb-1">
+                                                        {livreSelectionne.auteur ? `${livreSelectionne.auteur.prenoms} ${livreSelectionne.auteur.nom}` : "Inconnu"}
+                                                    </p>
                                                     {livreSelectionne.coauteurs && (
                                                         <p className="text-sm text-gray-600 mb-1">
                                                             Co-auteurs: {livreSelectionne.coauteurs}
@@ -1605,7 +687,9 @@ function DashboardAdmin() {
                                                             <td className="py-3 px-4 text-gray-600">{auteur.genrePrefere || 'N/A'}</td>
                                                             {/* ✅ Nouvelle cellule */}
                                                             <td className="py-3 px-4 text-gray-600 font-semibold">
-                                                                {auteur.nombreDeLivres ?? 0}
+                                                                <span className="cursor-pointer hover:text-blue-600" onClick={() => handleVoirLivresAuteur(auteur)}>
+                                                                    {auteur.nombreDeLivres ?? 0}
+                                                                </span>
                                                             </td>
 
                                                             <td className="py-3 px-4 font-semibold text-gray-700">{auteur.revenus} FG</td>
@@ -1615,17 +699,7 @@ function DashboardAdmin() {
                                                                     month: "short",
                                                                     year: "numeric",
                                                                 }) : 'N/A'}
-                                                            </td>
-                                                            <td className="py-3 px-4 flex gap-2">
-                                                                <button
-                                                                    className="text-blue-600 hover:text-blue-800 font-semibold"
-                                                                    onClick={() => {
-                                                                        alert(`Voir les détails de ${auteur.prenoms} ${auteur.nom}`);
-                                                                    }}
-                                                                >
-                                                                    Voir
-                                                                </button>
-                                                            </td>
+                                                            </td>                                                            
                                                         </tr>
                                                     ))
                                                 ) : (
@@ -1681,127 +755,196 @@ function DashboardAdmin() {
                         </div>
                     )}
 
-                    {/* {activeMenu === "utilisateurs" && (
-                        <div className="bg-white p-6 rounded-lg shadow-xl">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Liste des utilisateurs</h2>
+                    {/* Modale pour afficher les livres d'un auteur */}
+                    {auteurSelectionnePourLivres && (
+                        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
+                            <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl relative">
+                                <button
+                                    onClick={handleFermerModalLivresAuteur}
+                                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold"
+                                >
+                                    &times;
+                                </button>
+                                <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                                    Livres de {auteurSelectionnePourLivres.prenoms} {auteurSelectionnePourLivres.nom}
+                                </h3>
+                                {livresAuteur.length > 0 ? (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                                        {livresAuteur.map(livre => (
+                                            <div key={livre._id} className="text-center">
+                                                <img 
+                                                    src={livre.imageCouverture ? `http://localhost:5000/${livre.imageCouverture}` : 'https://via.placeholder.com/100x150'} 
+                                                    alt={livre.titre}
+                                                    className="w-full h-48 object-cover rounded-md shadow-md"
+                                                />
+                                                <p className="mt-2 text-sm font-semibold truncate">{livre.titre}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-center text-gray-500 py-8">Cet auteur n'a publié aucun livre pour le moment.</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+            
+
+
+        {activeMenu === "utilisateurs" && (
+            <div className="bg-white p-6 rounded-lg shadow-xl">
+               <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold">Gestion des auteurs</h2>
                                 <button
                                     onClick={() => navigate("/AjouterUser")}
                                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
                                 >
-                                    + Ajouter un utilisateur
+                                    + Ajouter un nouvel utilisateur
                                 </button>
                             </div>
-                            {loadingUtilisateurs ? (
-                                <p className="text-gray-500">Chargement...</p>
-                            ) : utilisateurs.length > 0 ? (
-                                <div className="overflow-x-auto rounded-lg shadow-md">
-                                    <table className="min-w-full bg-white border-collapse">
-                                        <thead className="bg-gray-200">
-                                            <tr>
-                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">N°</th>
-                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Nom complet</th>
-                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
-                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Statut</th>
-                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Inscrit le</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {utilisateurs.map((users, index) => (
-                                                <tr key={users._id} className="border-b last:border-0 hover:bg-gray-50">
-                                                    <td className="py-3 px-4">{index + 1}</td>
-                                                    <td className="py-3 px-4">{users.prenoms} {users.nom}</td>
-                                                    <td className="py-3 px-4">{users.email}</td>
-                                                    <td className="py-3 px-4">
-                                                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${users.estApprouve ? "bg-green-200 text-green-800" : "bg-gray-200 text-gray-800"}`}>
-                                                            {users.estApprouve ? "Approuvé" : "En attente"}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-3 px-4">{new Date(users.dateCreation).toLocaleDateString("fr-FR")}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500">Aucun utilisateur trouvé.</p>
-                            )}
-                        </div>
-                    )} */}
 
-{activeMenu === "utilisateurs" && (
-    <div className="bg-white p-6 rounded-lg shadow-xl">
-        <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Gestion des utilisateurs</h2>
-            {/* Si vous avez une route pour ajouter un utilisateur */}
-            {/* <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                + Ajouter un utilisateur
-            </button> */}
-        </div>
-
-        {loadingUtilisateurs ? (
-            <div className="text-center py-10 text-gray-500">Chargement des utilisateurs...</div>
-        ) : (
-            <>
-                <div className="overflow-x-auto rounded-lg shadow-md">
-                    <table className="min-w-full bg-white border-collapse">
-                        <thead className="bg-gray-200">
-                            <tr>
-                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Nom</th>
-                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
-                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Rôle</th>
-                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Statut</th>
-                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {utilisateurs.length > 0 ? (
-                                utilisateurs.map((user) => (
-                                    <tr key={user._id} className="border-b last:border-0 hover:bg-gray-50">
-                                        <td className="py-3 px-4">
-                                            {user.prenoms} {user.nom}
-                                        </td>
-                                        <td className="py-3 px-4 text-gray-600">{user.email}</td>
-                                        <td className="py-3 px-4 text-gray-600">{user.role}</td>
-                                        <td className="py-3 px-4">
-                                            <span className={`px-3 py-1 text-xs font-bold rounded-full ${user.estApprouve ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                                                {user.estApprouve ? 'Approuvé' : 'En attente'}
-                                            </span>
-                                        </td>
-                                        {/* <td className="py-3 px-4 flex gap-2"> */}
-                                            {/* Bouton pour approuver si l'utilisateur n'est pas approuvé */}
-                                            {/* {!user.estApprouve && (
-                                                <button
-                                                    onClick={() => handleApproveUser(user._id)}
-                                                    className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 transition"
-                                                >
-                                                    Approuver
-                                                </button>
-                                            )} */}
-                                            {/* Bouton pour supprimer */}
-                                            {/* <button
-                                                onClick={() => handleDeleteUser(user._id)}
-                                                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                                            >
-                                                Supprimer
-                                            </button>
-                                        </td> */}
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="text-center py-6 text-gray-500">
-                                        Aucun utilisateur trouvé.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                {/* Cartes de filtres */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+                    <div onClick={() => { setFiltreRole(null); setFiltreStatut(null); setCurrentPageUsers(1); }} className={`p-4 rounded-lg shadow-md cursor-pointer transition-all ${!filtreRole && !filtreStatut ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                        <h4 className="font-bold">Tous</h4>
+                        <p className="text-2xl">{userStats.total}</p>
+                    </div>
+                    <div onClick={() => handleFiltreRole('administrateur')} className={`p-4 rounded-lg shadow-md cursor-pointer transition-all ${filtreRole === 'administrateur' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                        <h4 className="font-bold">Admins</h4>
+                        <p className="text-2xl">{userStats.parRole.administrateur || 0}</p>
+                    </div>
+                    <div onClick={() => handleFiltreRole('auteur')} className={`p-4 rounded-lg shadow-md cursor-pointer transition-all ${filtreRole === 'auteur' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                        <h4 className="font-bold">Auteurs</h4>
+                        <p className="text-2xl">{userStats.parRole.auteur || 0}</p>
+                    </div>
+                    <div onClick={() => handleFiltreStatut('approuve')} className={`p-4 rounded-lg shadow-md cursor-pointer transition-all ${filtreStatut === 'approuve' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                        <h4 className="font-bold">Approuvés</h4>
+                        <p className="text-2xl">{userStats.parStatut.approuve || 0}</p>
+                    </div>
+                    <div onClick={() => handleFiltreStatut('en_attente')} className={`p-4 rounded-lg shadow-md cursor-pointer transition-all ${filtreStatut === 'en_attente' ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                        <h4 className="font-bold">En attente</h4>
+                        <p className="text-2xl">{userStats.parStatut.en_attente || 0}</p>
+                    </div>
                 </div>
-            </>
+
+                {loadingUtilisateurs ? (
+                    <div className="text-center py-10 text-gray-500">Chargement des utilisateurs...</div>
+                ) : (
+                    <>
+                        <div className="overflow-x-auto rounded-lg shadow-md">
+                            <table className="min-w-full bg-white border-collapse">
+                                <thead className="bg-gray-200">
+                                    <tr>
+                                        <th className="py-3 px-4 text-left font-semibold text-gray-600">N°</th>
+                                        <th className="py-3 px-4 text-left font-semibold text-gray-600">Nom</th>
+                                        <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
+                                        <th className="py-3 px-4 text-left font-semibold text-gray-600">Rôle</th>
+                                        <th className="py-3 px-4 text-left font-semibold text-gray-600">Statut</th>
+                                        <th className="py-3 px-4 text-left font-semibold text-gray-600">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {utilisateurs.length > 0 ? (
+                                        utilisateurs.map((user, index) => (
+                                            <tr key={user._id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                                                <td className="py-3 px-4 text-gray-600">
+                                                    {index + 1 + (currentPageUsers - 1) * itemsPerPage}
+                                                </td>
+                                                <td className="py-3 px-4 font-medium text-gray-800">
+                                                    {user.prenoms} {user.nom}
+                                                </td>
+                                                <td className="py-3 px-4 text-gray-600">{user.email}</td>
+                                                <td className="py-3 px-4 text-gray-600">{user.role}</td>
+                                                <td className="py-3 px-4">
+                                                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${user.estApprouve ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
+                                                        {user.estApprouve ? 'Approuvé' : 'En attente'}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4 flex gap-2">
+                                                    {user.estApprouve ? (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleModifierUser(user._id)}
+                                                                className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                                                            >
+                                                                Modifier
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleApproveUser(user._id)}
+                                                            className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 transition"
+                                                        >
+                                                            Approuver
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleVoirUser(user._id)}
+                                                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                                                    >
+                                                        Voir
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteUser(user._id)}
+                                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                                                    >
+                                                        Supprimer
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" className="text-center py-6 text-gray-500">
+                                                Aucun utilisateur trouvé pour les filtres sélectionnés.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination pour les utilisateurs */}
+                        {totalUtilisateurs > itemsPerPage && (
+                            <div className="flex justify-between items-center mt-6">
+                                <span className="text-sm text-gray-600">
+                                    Résultats {(currentPageUsers - 1) * itemsPerPage + 1} -{" "}
+                                    {Math.min(currentPageUsers * itemsPerPage, totalUtilisateurs)} sur {totalUtilisateurs}
+                                </span>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setCurrentPageUsers((prev) => Math.max(prev - 1, 1))}
+                                        disabled={currentPageUsers === 1}
+                                        className="px-4 py-2 border rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Préc
+                                    </button>
+                                    {[...Array(totalPagesUsers)].map((_, i) => (
+                                        <button
+                                            key={`user-page-${i + 1}`}
+                                            onClick={() => setCurrentPageUsers(i + 1)}
+                                            className={`px-4 py-2 border rounded-lg transition-all ${currentPageUsers === i + 1
+                                                ? "bg-purple-600 text-white"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                }`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setCurrentPageUsers((prev) => Math.min(prev + 1, totalPagesUsers))}
+                                        disabled={currentPageUsers === totalPagesUsers}
+                                        className="px-4 py-2 border rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Suiv
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         )}
-    </div>
-)}
 
                     {activeMenu === "actualites" && (
                         <div>
@@ -1872,31 +1015,76 @@ function DashboardAdmin() {
                                 >
                                     &times;
                                 </button>
+                                {/* Le contenu de la modale sera ajouté ici */}
+                            </div>
+                        </div>
+                    )}
 
-                                <div className="flex flex-col md:flex-row gap-6">
-                                    <div className="w-full md:w-1/3 flex-shrink-0">
-                                        <img
-                                            src={actualiteSelectionnee.image ? `http://localhost:5000/${actualiteSelectionnee.image}` : "https://via.placeholder.com/300x200"}
-                                            alt={actualiteSelectionnee.titre}
-                                            className="w-full h-auto object-cover rounded-md shadow"
-                                        />
+                    {/* Modale pour voir un utilisateur */}
+                    {userSelectionne && (
+                        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+                            <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-lg relative">
+                                <button
+                                    onClick={handleFermerUserModal}
+                                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold"
+                                >
+                                    &times;
+                                </button>
+                                <h3 className="text-2xl font-bold mb-6 text-gray-800">Détails de l'utilisateur</h3>
+                                <div className="flex items-center gap-6 mb-6">
+                                    <img
+                                        src={userSelectionne.imageProfil ? `http://localhost:5000/${userSelectionne.imageProfil}` : "https://via.placeholder.com/100"}
+                                        alt="Profil"
+                                        className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+                                    />
+                                    <div>
+                                        <p className="text-xl font-semibold">{userSelectionne.prenoms} {userSelectionne.nom}</p>
+                                        <p className="text-gray-600">{userSelectionne.email}</p>
+                                        <p className="text-gray-600">{userSelectionne.role}</p>
                                     </div>
-                                    <div className="w-full md:w-2/3">
-                                        <h2 className="text-3xl font-bold mb-2">{actualiteSelectionnee.titre}</h2>
-                                        <p className="text-sm text-gray-500 mb-4">{actualiteSelectionnee.publiePar || "Admin"} - {new Date(actualiteSelectionnee.dateEvenement).toLocaleDateString()}</p>
-                                        <p className="text-gray-700 mb-4">{actualiteSelectionnee.description}</p>
+                                </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
-                                            <p><strong>Catégorie:</strong> {actualiteSelectionnee.categorie}</p>
-                                            <p><strong>Heure:</strong> {actualiteSelectionnee.heure || 'N/A'}</p>
-                                            <p><strong>Lieu:</strong> {actualiteSelectionnee.lieu || 'N/A'}</p>
-                                            <p><strong>Temps de lecture:</strong> {actualiteSelectionnee.tempsDeLecture}</p>
-                                        </div>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex justify-between border-b pb-2">
+                                        <span className="font-semibold text-gray-600">Téléphone:</span>
+                                        <span>{userSelectionne.telephone || 'Non fourni'}</span>
                                     </div>
+                                    <div className="flex justify-between border-b pb-2">
+                                        <span className="font-semibold text-gray-600">Date de naissance:</span>
+                                        <span>
+                                            {userSelectionne.dateNaissance
+                                                ? new Date(userSelectionne.dateNaissance).toLocaleDateString('fr-FR')
+                                                : 'Non fournie'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between border-b pb-2">
+                                        <span className="font-semibold text-gray-600">Genre préféré:</span>
+                                        <span>{userSelectionne.genrePrefere || 'Non spécifié'}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b pb-2">
+                                        <span className="font-semibold text-gray-600">Inscrit le:</span>
+                                        <span>{new Date(userSelectionne.dateCreation).toLocaleDateString('fr-FR')}</span>
+                                    </div>
+                                    <div className="pt-2">
+                                        <p className="font-semibold text-gray-600 mb-1">Biographie:</p>
+                                        <p className="text-gray-700 bg-gray-50 p-3 rounded-md">
+                                            {userSelectionne.biographie || 'Aucune biographie.'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 text-right">
+                                    <button
+                                        onClick={handleFermerUserModal}
+                                        className="bg-gray-500 text-white px-5 py-2 rounded-lg hover:bg-gray-600 transition"
+                                    >
+                                        Fermer
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     )}
+
                 </div>
             </main>
         </div>

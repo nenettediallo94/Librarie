@@ -45,6 +45,7 @@ function App() {
     '/AdminLogin',   // page login admin
     '/admin/dashboard', // dashboard admin
     '/AjouterActualite', // page ajout actualité
+    '/AjouterUtilisateur' // page ajout utilisateur
   ];
 
   const hideHeader = noHeaderPaths.includes(location.pathname);

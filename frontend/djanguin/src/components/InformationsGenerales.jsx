@@ -1,7 +1,7 @@
-import React from "react";
+import React from "react"; // `auteurs` est ajouté aux props
 import "./InformationsGenerales.css";
 
-const InformationsGenerales = ({ formData, setFormData, onNext }) => {
+const InformationsGenerales = ({ formData, setFormData, onNext, auteurs }) => {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
@@ -40,12 +40,20 @@ const InformationsGenerales = ({ formData, setFormData, onNext }) => {
         <div className="author-coauthor">
           <label>
             Auteur principal :
-            <input
-              type="text"
+            {/* Remplacement de l'input par un select */}
+            <select
               name="author"
               value={formData.author}
               onChange={handleChange}
-            />
+              required
+            >
+              <option value="">-- Sélectionnez un auteur --</option>
+              {auteurs.map((auteur) => (
+                <option key={auteur._id} value={auteur._id}>
+                  {auteur.prenoms} {auteur.nom}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label>

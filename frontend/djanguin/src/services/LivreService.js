@@ -1,4 +1,4 @@
-// src/services/livreService.js
+// src/services/LivreService.js
 
 // Assurez-vous d'avoir une URL de base correcte pour votre API
 const API_BASE_URL = "http://localhost:5000";

@@ -23,7 +23,7 @@ function CataloguePage() {
   // Filtrer les livres en fonction du texte de recherche
   const filteredLivres = livres.filter((livre) =>
     livre.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    livre.auteur.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (livre.auteur && `${livre.auteur.prenoms} ${livre.auteur.nom}`.toLowerCase().includes(searchTerm.toLowerCase())) ||
     livre.genre.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -77,7 +77,9 @@ function CataloguePage() {
               {/* Contenu du livre */}
               <div className="p-4 flex flex-col flex-1">
                 <h4 className="text-lg font-bold truncate">{livre.titre}</h4>
-                <p className="text-sm font-semibold mb-2">{livre.auteur}</p>
+                <p className="text-sm font-semibold mb-2">
+                  {livre.auteur ? `${livre.auteur.prenoms} ${livre.auteur.nom}` : "Inconnu"}
+                </p>
 
                 <div className="flex justify-between text-xs mb-2">
                   <span className="italic">{livre.genre}</span>
@@ -126,5 +128,3 @@ function CataloguePage() {
 }
 
 export default CataloguePage;
-
-

@@ -1,20 +1,30 @@
 // auteurService.js
 const API_URL = "http://localhost:5000/api/auteurs";
 
-export const getAuteurs = async (page = 1, limit = 8) => {
+export const getAuteurs = async (params = {}) => {
   try {
-    const res = await fetch(`${API_URL}?page=${page}&limit=${limit}`);
+    // Construit l'URL avec les paramètres (page, limit, etc.)
+    const url = new URL(API_URL);
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+    const res = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        // Ajout du token pour les routes protégées
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
     if (!res.ok) {
       throw new Error("Erreur lors de la récupération des auteurs");
     }
+
     const data = await res.json();
-    // on s'assure que ça renvoie un objet avec auteurs et totalPages
-    return {
-      auteurs: data.auteurs || [],
-      totalPages: data.totalPages || 1,
-    };
+    // Renvoie directement la réponse du backend
+    return data;
+
   } catch (err) {
     console.error("Erreur récupération auteurs:", err);
-    return { auteurs: [], totalPages: 1 };
+    throw err; // Propage l'erreur pour que le composant appelant puisse la gérer
   }
 };

@@ -1,6 +1,6 @@
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import InformationsGenerales from "./InformationsGenerales";
 import EtapeContenu from "./EtapeContenu";
@@ -9,14 +9,17 @@ import BookPreview from "./BookPreview";
 import TipsSection from "./TipsSection";
 import StepIndicator from "./StepIndicator";
 import { createLivre } from "../services/bookService";
+import {getAuteurs} from "../services/auteurService";
 import "./AjouterLivre.css";
 
 const BookForm = () => {
   const navigate = useNavigate();
+  const [auteurs, setAuteurs] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
     author: "",
+    author: "", // ID de l'auteur sélectionné
     coauthors: "",
     genre: "",
     language: "",
@@ -35,6 +38,24 @@ const BookForm = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Récupérer la liste des auteurs au chargement du composant
+  useEffect(() => {
+    const fetchAuteurs = async () => {
+      try {
+        // Assurez-vous d'avoir une fonction dans votre service qui récupère TOUS les auteurs
+        const data = await getAuteurs({ page: 1, limit: 1000 }); // Récupère un grand nombre d'auteurs
+        if (data && data.auteurs) {
+          setAuteurs(data.auteurs);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des auteurs:", error);
+      }
+    };
+    fetchAuteurs();
+  }, []);
+
+
 
   const handleSubmit = async () => {
     try {
@@ -82,7 +103,12 @@ const BookForm = () => {
 
       <div className="form-layout">
         {currentStep === 1 && (
-          <InformationsGenerales formData={formData} setFormData={setFormData} onNext={() => setCurrentStep(2)} />
+          <InformationsGenerales
+            formData={formData}
+            setFormData={setFormData}
+            onNext={() => setCurrentStep(2)}
+            auteurs={auteurs} // ✅ Passer la liste des auteurs en prop
+          />
         )}
         {currentStep === 2 && (
           <EtapeContenu formData={formData} setFormData={setFormData} onNext={() => setCurrentStep(3)} onPrev={() => setCurrentStep(1)} />
@@ -101,6 +127,3 @@ const BookForm = () => {
 };
 
 export default BookForm;
-
-
-

@@ -12,7 +12,7 @@ function Header() {
     { name: "Catalogue", path: "/CataloguePage" },
     { name: "Auteurs", path: "/AuteurPage" },
     { name: "Abonnement", path: "/AbonnementPage" },
-    { name: "Mon espace", path: "/AdminLogin" }
+    { name: "Mon espace", path: "/selection-role" }
   ];
 
   const handleSearch = async (e) => {
@@ -97,5 +97,3 @@ function Header() {
 }
 
 export default Header;
-
-

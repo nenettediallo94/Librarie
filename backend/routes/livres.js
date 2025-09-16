@@ -49,7 +49,10 @@ router.get('/auteur/:auteurId', async (req, res) => {
 // GET /api/livres : Récupérer tous les livres
 router.get('/', async (req, res) => {
   try {
-    const livres = await Livre.find();
+    // ✅ Utilisation de .populate() pour joindre les informations de l'auteur
+    // 'auteur' est le champ dans le modèle Livre
+    // 'prenoms nom' sont les champs que nous voulons récupérer du modèle User
+    const livres = await Livre.find().populate('auteur', 'prenoms nom');
     res.json(livres);
   } catch (err) {
     res.status(500).json({ message: err.message });

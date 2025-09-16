@@ -104,10 +104,10 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['en_attente', 'abonné', 'auteur', 'administrateur'],
+        enum: ['abonné', 'auteur', 'administrateur'],
         // Le rôle n'est plus requis ici, il sera attribué par un admin plus tard.
-        required: false,
-        default: 'en_attente' // Valeur par défaut pour les utilisateurs non encore assignés
+        required: true,
+        default: 'abonné' // Valeur par défaut pour les utilisateurs non encore assignés
     },
     // Le nouveau champ pour gérer l'état d'approbation de l'utilisateur
     estApprouve: {

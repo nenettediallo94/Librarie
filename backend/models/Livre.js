@@ -13,7 +13,8 @@ const livreSchema = new mongoose.Schema({
         trim: true
     },
     auteur: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, // Change type to ObjectId
+        ref: 'User', // Reference the 'User' model
         required: true,
         trim: true
     },

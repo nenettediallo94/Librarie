@@ -57,6 +57,10 @@ import AjouterActualite from "./AjouterActualite"; // <-- Importer le composant 
 import ActualitesPage from "../pages/ActualitePage";
 import ActualiteDetail from "../components/ActualiteDetail"; // <-- Importer le composant de détail d'actualité
 import FAQ from "./FAQ";
+import ModifierUser from "./ModifierUser"; // Nouveau composant pour modifier un utilisateur
+import Inscription from "./Inscription"; // <-- Importer le composant d'inscription
+import RoleSelection from "./RoleSelection"; // <-- Importer la sélection de rôle
+import Connexion from "./Connexion"; // <-- Importer le composant de connexion
 
 
 
@@ -76,6 +80,11 @@ function Main() {
         <Route path="/ActualitesPage" element={<ActualitesPage />} />
         <Route path="/Actualite/:id" element={<ActualiteDetail />} />
         <Route path="/FAQ" element={<FAQ />} />
+        <Route path="/inscription" element={<Inscription />} />
+        <Route path="/selection-role" element={<RoleSelection />} />
+        <Route path="/connexion" element={<Connexion />} />
+        <Route path="/modifier-utilisateur/:id" element={<ModifierUser />} />
+
 
         {/* Connexion admin */}
         <Route path="/AdminLogin" element={<AdminLogin />} />

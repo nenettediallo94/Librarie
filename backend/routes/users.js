@@ -85,11 +85,44 @@ router.post('/', upload.single('imageProfil'), async (req, res) => {
 // Route GET pour récupérer tous les utilisateurs
 router.get('/', async (req, res) => {
   try {
-    const users = await User.find().select('-motDePasse'); // on exclut le mot de passe
-    res.status(200).json({ users });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Construction du filtre
+    const filtre = {};
+    if (req.query.role) {
+      filtre.role = req.query.role;
+    }
+    if (req.query.statut) {
+      filtre.estApprouve = req.query.statut === 'approuve';
+    }
+
+    const users = await User.find(filtre)
+      .select('-motDePasse')
+      .sort({ dateCreation: -1 }) // Trier par date de création décroissante
+      .skip(skip)
+      .limit(limit);
+      
+    const total = await User.countDocuments(filtre);
+    res.status(200).json({ utilisateurs: users, total });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
+  }
+});
+
+// Route GET pour les statistiques des utilisateurs
+router.get('/stats', async (req, res) => {
+  try {
+    const total = await User.countDocuments();
+    const parRole = await User.aggregate([{ $group: { _id: '$role', count: { $sum: 1 } } }]);
+    const parStatut = await User.aggregate([{ $group: { _id: '$estApprouve', count: { $sum: 1 } } }]);
+
+    res.status(200).json({ total, parRole, parStatut });
+  } catch (err) {
+    console.error("Erreur stats utilisateurs:", err);
+    res.status(500).json({ message: 'Erreur lors de la récupération des statistiques' });
   }
 });
 
@@ -108,6 +141,61 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Route PUT pour mettre à jour un utilisateur (y compris l'approbation)
+router.patch('/:id', upload.single('imageProfil'), async (req, res) => {
+  try {
+    const updateData = { ...req.body };
+
+    if (req.file) {
+      updateData.imageProfil = `public/profil/${req.file.filename}`;
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true }).select('-motDePasse');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    res.status(200).json({ message: 'Utilisateur mis à jour avec succès', user });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour de l\'utilisateur' });
+  }
+});
+
+// Route PATCH pour approuver un utilisateur
+router.patch('/approve/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    user.estApprouve = true;
+    // Optionnel : vous pouvez aussi assigner un rôle par défaut ici si nécessaire
+    // user.role = 'abonné'; 
+    await user.save();
+
+    res.status(200).json({ message: 'Utilisateur approuvé avec succès', user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur lors de l\'approbation de l\'utilisateur' });
+  }
+});
+
+// Route DELETE pour supprimer un utilisateur
+router.delete('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    await user.deleteOne(); // Utiliser deleteOne() ou remove()
+    res.status(200).json({ message: 'Utilisateur supprimé avec succès' });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur lors de la suppression de l\'utilisateur' });
+  }
+});
 
 module.exports = router;
-
