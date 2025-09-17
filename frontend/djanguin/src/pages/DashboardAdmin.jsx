@@ -6,9 +6,11 @@ import { getLivresByAuteurId } from "../services/LivreService";
 const API_URL_LIVRES = "http://localhost:5000/api/livres";
 const API_URL_AUTEURS = "http://localhost:5000/api/auteurs";
 const API_URL_USERS = "http://localhost:5000/api/users";
+const API_URL_CONTACT = "http://localhost:5000/api/contact";
 const API_URL_ACTUALITES = "http://localhost:5000/api/actualites";
 
 function DashboardAdmin() {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true); // État pour la sidebar
     const [activeMenu, setActiveMenu] = useState("vue-ensemble");
     const [adminName, setAdminName] = useState("");
     const [livres, setLivres] = useState([]);
@@ -39,8 +41,27 @@ function DashboardAdmin() {
     const [filtreStatut, setFiltreStatut] = useState(null); // Filtre par statut
     const [userStats, setUserStats] = useState({ total: 0, parRole: {}, parStatut: {} });
 
+    // ✅ États pour la newsletter
+    const [newsletterSubscribers, setNewsletterSubscribers] = useState([]);
+    const [loadingNewsletter, setLoadingNewsletter] = useState(true);
+    const [totalNewsletter, setTotalNewsletter] = useState(0);
+
+    // ✅ États pour les messages de contact
+    const [contactMessages, setContactMessages] = useState([]);
+    const [loadingMessages, setLoadingMessages] = useState(true);
+    const [selectedMessage, setSelectedMessage] = useState(null);
+
     const navigate = useNavigate();
 
+    // Gérer l'affichage de la sidebar en fonction de la taille de l'écran
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSidebarOpen(window.innerWidth > 768); // md breakpoint
+        };
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Appel initial
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     // --- Récupération du nom de l'admin ---
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -117,7 +138,56 @@ function DashboardAdmin() {
         }
     }, [activeMenu]);
 
+    // ✅ Récupération des inscrits à la newsletter
+    useEffect(() => {
+        const fetchNewsletterSubscribers = async () => {
+            if (activeMenu !== 'newsletter') return;
 
+            setLoadingNewsletter(true);
+            try {
+                const res = await fetch("http://localhost:5000/api/newsletter/subscribers", {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                const data = await res.json();
+                setNewsletterSubscribers(Array.isArray(data) ? data : []);
+                setTotalNewsletter(data.length);
+            } catch (err) {
+                console.error("Erreur fetch inscrits newsletter:", err);
+            } finally {
+                setLoadingNewsletter(false);
+            }
+        };
+        fetchNewsletterSubscribers();
+    }, [activeMenu]);
+
+    // ✅ Récupération des messages de contact
+    useEffect(() => {
+        const fetchContactMessages = async () => {
+            if (activeMenu !== 'messages') return;
+
+            setLoadingMessages(true);
+            try {
+                const res = await fetch(`${API_URL_CONTACT}/messages`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                const data = await res.json();
+                setContactMessages(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error("Erreur fetch messages de contact:", err);
+            } finally {
+                setLoadingMessages(false);
+            }
+        };
+        fetchContactMessages();
+    }, [activeMenu]);
 
     // ... (autres useEffects)
 
@@ -357,6 +427,15 @@ const handleDeleteUser = async (userId) => {
         setActualiteSelectionnee(null);
     };
 
+    // ✅ Fonctions pour les messages de contact
+    const handleVoirMessage = (message) => {
+        setSelectedMessage(message);
+    };
+
+    const handleFermerMessageModal = () => {
+        setSelectedMessage(null);
+    };
+
     const totalPages = Math.ceil(totalAuteurs / itemsPerPage);
     const totalPagesUsers = Math.ceil(totalUtilisateurs / itemsPerPage);
 
@@ -366,22 +445,24 @@ const handleDeleteUser = async (userId) => {
         { key: "auteurs", label: "Auteurs" },
         { key: "utilisateurs", label: "Utilisateurs" },
         { key: "actualites", label: "Actualités" },
+        { key: "newsletter", label: "Newsletter" },
+        { key: "messages", label: "Messages" },
         { key: "abonnements", label: "Abonnements" },
         { key: "revenus", label: "Revenus" },
         { key: "parametres", label: "Paramètres" },
     ];
 
     return (
-        <div className="bg-[#DEDEDE] min-h-screen">
+        <div className="bg-[#DEDEDE] min-h-screen font-sans">
             {/* Barre latérale */}
-            <aside className="w-64 bg-[#160216] flex flex-col justify-between p-6 shadow-lg fixed top-0 left-0 h-full z-10">
+            <aside className={`w-64 bg-[#160216] flex flex-col justify-between p-6 shadow-lg fixed top-0 left-0 h-full z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div>
                     <h2 className="text-2xl font-bold mb-6 text-white">Admin Dashboard</h2>
                     <ul className="flex flex-col gap-2">
                         {menuItems.map((item) => (
                             <li
                                 key={item.key}
-                                onClick={() => setActiveMenu(item.key)}
+                                onClick={() => { setActiveMenu(item.key); if (window.innerWidth < 768) setIsSidebarOpen(false); }}
                                 className={`cursor-pointer px-4 py-2 rounded-md transition-all font-semibold ${activeMenu === item.key
                                     ? "bg-white text-[#160216]"
                                     : "bg-[#160216] text-white hover:bg-white hover:text-[#160216]"
@@ -409,10 +490,21 @@ const handleDeleteUser = async (userId) => {
             </aside>
 
             {/* Contenu principal */}
-            <main className="ml-64 flex-1 flex flex-col"> {/* ml-64 pour décaler le contenu de la largeur de la sidebar */}
+            <main className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
                 {/* Barre supérieure */}
-                <div className="mx-6 my-6 p-6 bg-[#F5F5F5] border border-gray-400 rounded-xl shadow-sm flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Tableau de bord</h1>
+                <div className="mx-4 sm:mx-6 my-6 p-4 sm:p-6 bg-[#F5F5F5] border border-gray-400 rounded-xl shadow-sm flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        {/* Bouton Hamburger pour mobile */}
+                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden p-2 text-gray-700">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
+                            Tableau de bord
+                        </h1>
+                    </div>
+
                     <div className="flex items-center gap-4">
                         <button className="relative">
                             <svg
@@ -444,7 +536,7 @@ const handleDeleteUser = async (userId) => {
                 </div>
 
                 {/* Cartes de stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 px-4 sm:px-6">
                     {/* Abonnés */}
                     <div className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
                         <div>
@@ -469,6 +561,14 @@ const handleDeleteUser = async (userId) => {
                         </div>
                     </div>
 
+                    {/* Inscrits Newsletter */}
+                    {/* <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
+                        <div>
+                            <h3 className="text-base font-bold text-gray-500">Inscrits Newsletter</h3>
+                            <p className="text-xl font-semibold">{totalNewsletter}</p>
+                        </div>
+                    </div> */}
+
                     {/* Livres lus 75% */}
                     <div className="bg-white p-4 rounded-lg shadow flex items-center gap-4">
                         <div>
@@ -486,7 +586,7 @@ const handleDeleteUser = async (userId) => {
                 </div>
 
                 {/* Sections */}
-                <div className="flex-1 p-8">
+                <div className="flex-1 p-4 sm:p-8">
                     {activeMenu === "vue-ensemble" && (
                         <div>
                             <h2 className="text-xl font-semibold mb-4">Vue d'ensemble</h2>
@@ -1016,6 +1116,130 @@ const handleDeleteUser = async (userId) => {
                                     &times;
                                 </button>
                                 {/* Le contenu de la modale sera ajouté ici */}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ✅ Section Newsletter */}
+                    {activeMenu === "newsletter" && (
+                        <div className="bg-white p-6 rounded-lg shadow-xl">
+                            <h2 className="text-2xl font-bold mb-4">Inscrits à la Newsletter</h2>
+                            {loadingNewsletter ? (
+                                <div className="text-center py-10 text-gray-500">Chargement...</div>
+                            ) : (
+                                <div className="overflow-x-auto rounded-lg shadow-md">
+                                    <table className="min-w-full bg-white border-collapse">
+                                        <thead className="bg-gray-200">
+                                            <tr>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">N°</th>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Date d'inscription</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {newsletterSubscribers.length > 0 ? (
+                                                newsletterSubscribers.map((subscriber, index) => (
+                                                    <tr key={subscriber._id} className="border-b last:border-0 hover:bg-gray-50">
+                                                        <td className="py-3 px-4">{index + 1}</td>
+                                                        <td className="py-3 px-4 font-medium text-gray-800">{subscriber.email}</td>
+                                                        <td className="py-3 px-4 text-gray-600">
+                                                            {new Date(subscriber.dateInscription).toLocaleDateString("fr-FR", {
+                                                                day: '2-digit',
+                                                                month: 'long',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="3" className="text-center py-6 text-gray-500">
+                                                        Aucun inscrit à la newsletter pour le moment.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ✅ Section Messages de Contact */}
+                    {activeMenu === "messages" && (
+                        <div className="bg-white p-6 rounded-lg shadow-xl">
+                            <h2 className="text-2xl font-bold mb-4">Messages de Contact</h2>
+                            {loadingMessages ? (
+                                <div className="text-center py-10 text-gray-500">Chargement des messages...</div>
+                            ) : (
+                                <div className="overflow-x-auto rounded-lg shadow-md">
+                                    <table className="min-w-full bg-white border-collapse">
+                                        <thead className="bg-gray-200">
+                                            <tr>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Date</th>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Nom</th>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Email</th>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Message (Extrait)</th>
+                                                <th className="py-3 px-4 text-left font-semibold text-gray-600">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {contactMessages.length > 0 ? (
+                                                contactMessages.map((msg) => (
+                                                    <tr key={msg._id} className="border-b last:border-0 hover:bg-gray-50">
+                                                        <td className="py-3 px-4 text-sm text-gray-600 whitespace-nowrap">
+                                                            {new Date(msg.dateEnvoi).toLocaleDateString("fr-FR")}
+                                                        </td>
+                                                        <td className="py-3 px-4 font-medium">{msg.nom}</td>
+                                                        <td className="py-3 px-4 text-gray-600">{msg.email}</td>
+                                                        <td className="py-3 px-4 text-gray-600 truncate max-w-xs">{msg.message}</td>
+                                                        <td className="py-3 px-4">
+                                                            <button
+                                                                onClick={() => handleVoirMessage(msg)}
+                                                                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                                                            >
+                                                                Lire & Répondre
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="5" className="text-center py-6 text-gray-500">
+                                                        Aucun message de contact.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ✅ Modale pour lire et répondre à un message */}
+                    {selectedMessage && (
+                        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
+                            <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl relative">
+                                <button onClick={handleFermerMessageModal} className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold">&times;</button>
+                                <h3 className="text-2xl font-bold mb-4">Message de {selectedMessage.nom}</h3>
+                                <div className="bg-gray-50 p-4 rounded-md mb-6">
+                                    <p className="font-semibold">De : <a href={`mailto:${selectedMessage.email}`} className="text-blue-600">{selectedMessage.email}</a></p>
+                                    <p className="font-semibold">Le : {new Date(selectedMessage.dateEnvoi).toLocaleString("fr-FR")}</p>
+                                    <p className="mt-4 whitespace-pre-wrap">{selectedMessage.message}</p>
+                                </div>
+                                <h4 className="text-xl font-bold mb-2">Répondre</h4>
+                                <form action={`mailto:${selectedMessage.email}`} method="GET">
+                                    <textarea
+                                        name="body"
+                                        rows="5"
+                                        className="w-full p-2 border rounded-md"
+                                        placeholder={`Bonjour ${selectedMessage.nom},\n\nMerci pour votre message...\n\nCordialement,\nL'équipe Djanguin`}
+                                    ></textarea>
+                                    <button type="submit" className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                                        Ouvrir dans le client mail
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     )}

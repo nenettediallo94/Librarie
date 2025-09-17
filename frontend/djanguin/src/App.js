@@ -48,20 +48,30 @@ function App() {
     '/AjouterUtilisateur' // page ajout utilisateur
   ];
 
+  // ✅ Pages sur lesquelles le Footer ne doit pas s'afficher
+  const noFooterPaths = [
+    '/AjouterLivre',
+    '/AdminLogin',
+    '/admin/dashboard',
+    '/AjouterActualite',
+    '/AjouterUtilisateur',
+    '/inscription',
+    '/connexion',
+    '/selection-role'
+  ];
+
   const hideHeader = noHeaderPaths.includes(location.pathname);
+  const hideFooter = noFooterPaths.includes(location.pathname);
 
   return (
     <div className="flex flex-col min-h-screen mt-20">
       {/* Header conditionnel */}
       {!hideHeader && <Header />}
-      <main className="flex-grow">
-        
-        <Main />
-      </main>
-      <Footer />
+      <main className="flex-grow"><Main /></main>
+      {/* Footer conditionnel */}
+      {!hideFooter && <Footer />}
     </div>
   );
 }
 
 export default App;
-

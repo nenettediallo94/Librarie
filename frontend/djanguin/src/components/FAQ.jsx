@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { MdEmail, MdPhone, MdChat } from "react-icons/md";
 
 const faqData = [
   { category: "Utilisation", question: "Comment puis-je lire un livre sur Djanguin ?", answer: "Vous pouvez lire un livre en vous inscrivant, en parcourant le catalogue et en cliquant sur 'Lire'." },
@@ -14,10 +13,51 @@ const faqData = [
 
 export default function FAQ() {
   const [activeIndex, setActiveIndex] = useState(null);
+  const [formData, setFormData] = useState({ nom: '', email: '', message: '' });
+  const [formStatus, setFormStatus] = useState({ message: '', error: false, loading: false });
 
   const toggleFAQ = (index) => {
     setActiveIndex(activeIndex === index ? null : index);
   };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setFormStatus({ message: '', error: false, loading: true });
+
+    try {
+      const response = await fetch('http://localhost:5000/api/contact/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Une erreur est survenue.');
+      }
+
+      setFormStatus({ message: data.message, error: false, loading: false });
+      setFormData({ nom: '', email: '', message: '' }); // Vider le formulaire
+
+    } catch (err) {
+      setFormStatus({ message: err.message, error: true, loading: false });
+    } finally {
+      // Faire disparaître le message après 5 secondes
+      setTimeout(() => {
+        setFormStatus(prev => ({ ...prev, message: '' }));
+      }, 5000);
+    }
+  };
+
+  const { nom, email, message } = formData;
+  const { message: statusMessage, error: isError, loading } = formStatus;
+
 
   return (
     <section className="py-16 bg-[#f9f9ff]">
@@ -67,9 +107,41 @@ export default function FAQ() {
             Notre équipe est là pour vous aider. N’hésitez pas à nous contacter :
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-6 text-gray-700">
-            <p className="flex items-center gap-2"><MdChat /> Chat en direct</p>
-            <p className="flex items-center gap-2"><MdEmail /> support@dianguin.gn</p>
-            <p className="flex items-center gap-2"><MdPhone /> +224 XX XX XX XX</p>
+            <form onSubmit={handleContactSubmit} className="w-full max-w-lg mx-auto space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="text"
+                  name="nom"
+                  value={nom}
+                  onChange={handleInputChange}
+                  placeholder="Votre nom complet"
+                  required
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={handleInputChange}
+                  placeholder="Votre adresse e-mail"
+                  required
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+              </div>
+              <textarea
+                name="message"
+                value={message}
+                onChange={handleInputChange}
+                placeholder="Votre message..."
+                rows="4"
+                required
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              ></textarea>
+              <button type="submit" disabled={loading} className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400">
+                {loading ? 'Envoi en cours...' : 'Envoyer le message'}
+              </button>
+              {statusMessage && <p className={`mt-4 text-sm ${isError ? 'text-red-600' : 'text-green-600'}`}>{statusMessage}</p>}
+            </form>
           </div>
         </div>
       </div>

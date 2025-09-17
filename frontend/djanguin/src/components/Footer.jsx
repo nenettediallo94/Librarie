@@ -28,7 +28,7 @@ export default function Footer() {
             <li><a href="CataloguePage" className="hover:text-white">Catalogue</a></li>
             <li><a href="AuteurPage" className="hover:text-white">Auteurs Guinéens</a></li>
             <li><a href="CataloguePage" className="hover:text-white">Nouveautés</a></li>
-            <li><a href="#" className="hover:text-white">Genres Populaires</a></li>
+            <li><a href="ActualitesPage" className="hover:text-white">Actualités</a></li>
           </ul>
         </div>
 
@@ -47,8 +47,8 @@ export default function Footer() {
       {/* Ligne contact + copyright */}
       <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
         <div className="flex flex-col md:flex-row md:space-x-6 mb-4 md:mb-0">
-          <p className="flex items-center gap-2"><MdEmail /> contact@dianguin.gn</p>
-          <p className="flex items-center gap-2"><MdPhone /> +224 XX XX XX XX</p>
+          <p className="flex items-center gap-2"><MdEmail />nenettediallo94@gmail.com</p>
+          <p className="flex items-center gap-2"><MdPhone /> +224 622 56 10 90</p>
           <p className="flex items-center gap-2"><MdLocationOn /> Conakry, Guinée</p>
         </div>
         <p className="text-gray-400 text-center">

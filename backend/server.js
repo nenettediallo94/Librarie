@@ -13,6 +13,10 @@ const searchRoutes = require('./routes/search');
 const adminloginRoutes = require('./routes/adminlogin');
 const actualitesRoutes = require('./routes/actualites');
 const temoignagesRoutes = require('./routes/temoignages');
+const newsletterRoutes = require('./routes/newsletter');
+const statsRoutes = require('./routes/statsRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+
 
 
 dotenv.config();
@@ -42,6 +46,10 @@ app.use('/api/search', searchRoutes);
 app.use('/api/adminlogin', adminloginRoutes);
 app.use('/api/actualites', actualitesRoutes);
 app.use('/api/temoignages', temoignagesRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/contact', contactRoutes);
+
 
 // route dynamique pour oeuvres
 

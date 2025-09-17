@@ -39,8 +39,8 @@ function Connexion() {
             const payload = JSON.parse(atob(data.token.split(".")[1]));
             
             // Rediriger en fonction du rôle
-            if (payload.user.role === 'admin') {
-                navigate("/DashboardAdmin");
+            if (payload.user.role === 'administrateur') {
+                navigate("/admin/dashboard");
             } else {
                 navigate("/"); // Rediriger les autres utilisateurs vers l'accueil
             }
