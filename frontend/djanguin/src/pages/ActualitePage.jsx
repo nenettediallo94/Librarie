@@ -66,7 +66,7 @@ function ActualitesPage() {
                       {actu.categorie}
                     </span>
                     <span className="italic">
-                      Publié le {new Date(actu.publieLe).toLocaleDateString()}
+                      Publié le {new Date(actu.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <h2 className="font-bold text-lg text-blue-800 line-clamp-2 mb-2">

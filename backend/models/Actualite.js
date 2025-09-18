@@ -28,8 +28,8 @@ const actualiteSchema = new mongoose.Schema({
     required: false,
   },
    dateEvenement: { // Nom du champ mis à jour
-    type: String,
-    required: false,
+    type: Date, // ✅ Changé en type Date pour plus de fiabilité
+    required: true,
   },
   heure: { // Heure de l'événement si applicable
     type: String,

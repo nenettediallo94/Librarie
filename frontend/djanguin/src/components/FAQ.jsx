@@ -60,7 +60,7 @@ export default function FAQ() {
 
 
   return (
-    <section className="py-16 bg-[#f9f9ff]">
+    <section className="py-16 bg-[#dadaf5]">
       <div className="max-w-4xl mx-auto px-4">
         {/* Titre */}
         <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">

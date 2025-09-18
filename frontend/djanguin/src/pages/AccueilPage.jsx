@@ -176,28 +176,31 @@ function Accueil() {
       {/* ... (sections Livres, Actualités, Auteurs, Newsletter inchangées) ... */}
 
       {/* Livres récents */}
-      <div className="bg-white text-black rounded-lg p-6 shadow-lg w-full max-w-8xl mx-auto my-12 flex flex-col">
-       <div className="flex justify-between items-center mb-4">
-         <div>
-             <h2 className="text-2xl font-bold">📖 Livres ajoutés récemment</h2>
-             <p className="text-gray-600 text-sm">
-              Les œuvres les plus appréciées par nos lecteurs
+      <div className="bg-white text-black rounded-lg p-6 shadow-lg w-full max-w-8xl mx-auto my-12">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-bold">📖 Découvrez notre collection</h2>
+            <p className="text-gray-600 text-sm">
+              Les œuvres de notre catalogue qui défilent pour vous.
             </p>
           </div>
-        <Link
+          <Link
             to="/CataloguePage"
             className="text-sm bg-[#160216] text-white px-4 py-2 rounded-full hover:bg-white hover:text-[#160216] border border-[#160216] transition"
           >
             Voir tout
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {recentBooks.length > 0 ? (
-            recentBooks.map((livre) => (
+        {/* Carrousel de livres */}
+        <div className="relative w-full overflow-hidden group">
+          <div className="flex animate-scroll">
+            {/* On duplique la liste pour un effet de boucle infini */}
+            {[...recentBooks, ...recentBooks].map((livre, index) => (
               <div
-                key={livre._id}
-                className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition flex flex-col"
+                key={`${livre._id}-${index}`}
+                className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3"
               >
+                <div className="border border-gray-200 rounded-lg overflow-hidden shadow hover:shadow-xl hover:border-purple-400 transition-all duration-300 flex flex-col h-full bg-white">
                 <img
                   src={`http://localhost:5000/${livre.imageCouverture}`}
                   alt={livre.titre}
@@ -237,11 +240,10 @@ function Accueil() {
                     </Link>
                   </div>
                 </div>
+                </div>
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 italic">Aucun livre ajouté récemment.</p>
-          )}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -348,7 +350,7 @@ function Accueil() {
                         </span>
                         <span className="italic">
                           Publié le{" "}
-                          {new Date(actualiteActuelle.publieLe).toLocaleDateString()}
+                          {new Date(actualiteActuelle.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <h3 className="font-bold text-lg text-blue-800 line-clamp-2">
@@ -359,8 +361,7 @@ function Accueil() {
                       </p>
                     </div>
                     <div className="mt-4">
-                      <Link
-                        to={`/Actualite/${actualiteActuelle._id}`}
+                      <Link to={`/actualite/${actualiteActuelle._id}`}
                         className="inline-block bg-blue-600 text-white py-2 px-4 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors"
                       >
                         Lire la suite

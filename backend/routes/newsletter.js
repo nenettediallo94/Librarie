@@ -23,6 +23,17 @@ router.post('/subscribe', async (req, res) => {
         subscriber = new Newsletter({ email });
         await subscriber.save();
 
+        // ✅ Émission de la notification en temps réel pour l'admin
+        if (req.io) {
+            req.io.emit('nouvelle-notification', {
+                id: `newsletter-${subscriber._id}`,
+                message: `Nouvel abonné à la newsletter : ${subscriber.email}.`,
+                read: false,
+                date: subscriber.dateInscription,
+                type: 'newsletter'
+            });
+        }
+
         res.status(201).json({ message: 'Merci ! Vous êtes maintenant inscrit à notre newsletter.' });
     } catch (error) {
         res.status(500).json({ message: 'Une erreur est survenue. Veuillez réessayer.', error: error.message });

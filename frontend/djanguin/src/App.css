@@ -37,4 +37,24 @@
   to {
     transform: rotate(360deg);
   }
-} */
+}
+*/
+
+/* Animation pour le défilement du carrousel de livres */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* La moitié de la largeur totale (puisque la liste est dupliquée) */
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.group:hover .animate-scroll {
+  animation-play-state: paused;
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getLivresByAuteurId } from "../services/LivreService";
 
+import io from "socket.io-client"; // 👈 Importer le client socket.io
 // ✅ Constantes pour les routes API
 const API_URL_LIVRES = "http://localhost:5000/api/livres";
 const API_URL_AUTEURS = "http://localhost:5000/api/auteurs";
@@ -51,6 +52,11 @@ function DashboardAdmin() {
     const [loadingMessages, setLoadingMessages] = useState(true);
     const [selectedMessage, setSelectedMessage] = useState(null);
 
+    // Notifications
+    const [notifications, setNotifications] = useState([]);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const unreadNotificationsCount = notifications.filter(n => !n.read).length;
+
     const navigate = useNavigate();
 
     // Gérer l'affichage de la sidebar en fonction de la taille de l'écran
@@ -61,6 +67,53 @@ function DashboardAdmin() {
         window.addEventListener('resize', handleResize);
         handleResize(); // Appel initial
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // --- Récupération des notifications initiales ---
+    useEffect(() => {
+        const fetchInitialNotifications = async () => {
+            try {
+                const res = await fetch(`http://localhost:5000/api/notifications`, { // ✅ Utiliser la nouvelle route
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+                if (!res.ok) throw new Error("Erreur récupération notifications");
+                const initialNotifications = await res.json();
+                // On utilise une fonction pour éviter les doublons si une notif arrive en même temps
+                setNotifications(prev => {
+                    const existingIds = new Set(prev.map(n => n.id));
+                    const newNotifications = initialNotifications.filter(n => !existingIds.has(n.id));
+                    return [...prev, ...newNotifications];
+                });
+            } catch (err) {
+                console.error("Erreur fetch notifications initiales:", err);
+            }
+        };
+        fetchInitialNotifications();
+    }, []);
+
+    // --- Connexion WebSocket pour les notifications en temps réel ---
+    useEffect(() => {
+        // Se connecte au serveur WebSocket
+        const socket = io("http://localhost:5000");
+
+        // Écoute l'événement 'nouvelle-notification'
+        socket.on('nouvelle-notification', (newNotification) => {
+            console.log('Notification reçue:', newNotification);
+            // Ajoute la notification seulement si elle n'existe pas déjà
+            setNotifications(prev => {
+                const isAlreadyPresent = prev.some(n => n.id === newNotification.id);
+                if (isAlreadyPresent) return prev;
+                return [newNotification, ...prev];
+            });
+        });
+
+        // Nettoyage à la fermeture du composant
+        return () => {
+            socket.disconnect();
+        };
     }, []);
     // --- Récupération du nom de l'admin ---
     useEffect(() => {
@@ -132,17 +185,12 @@ function DashboardAdmin() {
                 console.error("Erreur fetch stats utilisateurs:", err);
             }
         };
-        // On ne charge les stats que lorsque l'onglet utilisateur est actif
-        if (activeMenu === 'utilisateurs') {
-            fetchUserStats();
-        }
-    }, [activeMenu]);
+        fetchUserStats();
+    }, []); // Se charge une seule fois au montage du composant
 
     // ✅ Récupération des inscrits à la newsletter
     useEffect(() => {
         const fetchNewsletterSubscribers = async () => {
-            if (activeMenu !== 'newsletter') return;
-
             setLoadingNewsletter(true);
             try {
                 const res = await fetch("http://localhost:5000/api/newsletter/subscribers", {
@@ -162,7 +210,7 @@ function DashboardAdmin() {
             }
         };
         fetchNewsletterSubscribers();
-    }, [activeMenu]);
+    }, []); // Se charge une seule fois au montage du composant
 
     // ✅ Récupération des messages de contact
     useEffect(() => {
@@ -436,6 +484,11 @@ const handleDeleteUser = async (userId) => {
         setSelectedMessage(null);
     };
 
+    const handleNotificationClick = () => {
+        setIsNotificationsOpen(prev => !prev);
+        setNotifications(notifications.map(n => ({ ...n, read: true })));
+    };
+
     const totalPages = Math.ceil(totalAuteurs / itemsPerPage);
     const totalPagesUsers = Math.ceil(totalUtilisateurs / itemsPerPage);
 
@@ -506,23 +559,47 @@ const handleDeleteUser = async (userId) => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="relative">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-gray-800"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-5M9 17H4l1.405-1.405A2.032 2.032 0 006 14.158V11a6 6 0 0112 0v3.159c0 .538.214 1.055.595 1.436L20 17h-5m-4 0v1a3 3 0 006 0v-1m-6 0h6"
-                                />
-                            </svg>
-                            <span className="absolute top-0 right-0 h-2 w-2 bg-red-600 rounded-full"></span>
-                        </button>
+                        <div className="relative">
+                            <button onClick={handleNotificationClick} className="relative">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 text-gray-800"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-5M9 17H4l1.405-1.405A2.032 2.032 0 006 14.158V11a6 6 0 0112 0v3.159c0 .538.214 1.055.595 1.436L20 17h-5m-4 0v1a3 3 0 006 0v-1m-6 0h6"
+                                    />
+                                </svg>
+                                {unreadNotificationsCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+                                        {unreadNotificationsCount}
+                                    </span>
+                                )}
+                            </button>
+                            {isNotificationsOpen && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 border">
+                                    <div className="p-4 font-bold border-b">Notifications</div>
+                                    <ul className="max-h-96 overflow-y-auto">
+                                        {notifications.length > 0 ? (
+                                            notifications.map(notif => (
+                                                <li key={notif.id} className="border-b last:border-0">
+                                                    <a href="#" className="block p-4 text-sm text-gray-700 hover:bg-gray-100">
+                                                        {notif.message}
+                                                    </a>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="p-4 text-sm text-gray-500 text-center">Aucune nouvelle notification</li>
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="flex items-center gap-2 bg-white p-2 rounded-full">
                             <img
@@ -541,7 +618,7 @@ const handleDeleteUser = async (userId) => {
                     <div className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
                         <div>
                             <h3 className="text-base font-bold text-gray-500">Abonnés</h3>
-                            <p className="text-2xl font-semibold">120</p>
+                            <p className="text-2xl font-semibold">{userStats.parRole.abonné || 0}</p>
                         </div>
                     </div>
 

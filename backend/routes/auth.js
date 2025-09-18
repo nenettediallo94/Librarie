@@ -337,6 +337,19 @@ router.post('/register', upload.single('imageProfil'), async (req, res) => {
             imageProfil: imageProfilPath
         });
         await user.save();
+
+        // ✅ Émission de la notification en temps réel pour l'admin
+        if (req.io) {
+            req.io.emit('nouvelle-notification', {
+                id: user._id, // Utiliser l'ID de l'utilisateur
+                message: `Nouvel utilisateur en attente d'approbation : ${user.prenoms} ${user.nom}.`,
+                read: false,
+                date: new Date()
+                // Vous pourriez ajouter un lien vers la page de gestion des utilisateurs
+                // link: `/admin/utilisateurs` 
+            });
+        }
+
         res.status(201).json({ message: 'Inscription réussie. Votre compte est en attente d\'approbation.' });
     } catch (err) {
         if (req.file) fs.unlinkSync(req.file.path);

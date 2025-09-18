@@ -1,10 +1,12 @@
 // src/components/Footer.jsx
 import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+import { Link } from "react-router-dom"; // ✅ 1. Importer le composant Link
 import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
 
 export default function Footer() {
   return (
     <footer className="bg-white text-[#0d1117] py-10 px-6">
+
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         
         {/* Section 1 - Logo + Description + Réseaux sociaux */}
@@ -23,23 +25,25 @@ export default function Footer() {
 
         {/* Section 2 - Liens rapides */}
         <div>
-          <h3 className="text-white font-semibold mb-3">Liens Rapides</h3>
-          <ul className="space-y-2 text-sm">
-            <li><a href="CataloguePage" className="hover:text-white">Catalogue</a></li>
-            <li><a href="AuteurPage" className="hover:text-white">Auteurs Guinéens</a></li>
-            <li><a href="CataloguePage" className="hover:text-white">Nouveautés</a></li>
-            <li><a href="ActualitesPage" className="hover:text-white">Actualités</a></li>
+
+          <h3 className="text-black font-semibold mb-3">Liens Rapides</h3>
+          <ul className="space-y-2">
+            {/* ✅ 2. Remplacer <a> par <Link> et href par to */}
+            <li><Link to="/CataloguePage" className="hover:text-blue-600">Catalogue</Link></li>
+            <li><Link to="/AuteurPage" className="hover:text-blue-600">Auteurs Guinéens</Link></li>
+            <li><Link to="/CataloguePage" className="hover:text-blue-600">Nouveautés</Link></li>
+            <li><Link to="/ActualitesPage" className="hover:text-blue-600">Actualités</Link></li>
           </ul>
         </div>
 
         {/* Section 3 - Support */}
         <div>
-          <h3 className="text-white font-semibold mb-3">Support</h3>
-          <ul className="space-y-2 text-sm">
-            <li><a href="FAQ" className="hover:text-white">FAQ</a></li>
-            <li><a href="GuideUtilisation" className="hover:text-white">Guide d’utilisation</a></li>
-            <li><a href="PourLesAuteurs" className="hover:text-white">Pour les Auteurs</a></li>
-            <li><a href="NousContacter" className="hover:text-white">Nous Contacter</a></li>
+          <h3 className="text-black font-semibold mb-3">Support</h3>
+          <ul className="space-y-2">
+            <li><Link to="/FAQ" className="hover:text-blue-600">FAQ</Link></li>
+            <li><Link to="/GuideUtilisation" className="hover:text-blue-600">Guide d’utilisation</Link></li>
+            <li><Link to="/PourLesAuteurs" className="hover:text-blue-600">Pour les Auteurs</Link></li>
+            <li><Link to="/NousContacter" className="hover:text-blue-600">Nous Contacter</Link></li>
           </ul>
         </div>
       </div>
