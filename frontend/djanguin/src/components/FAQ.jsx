@@ -99,7 +99,7 @@ export default function FAQ() {
         </div>
 
         {/* Bloc contact */}
-        <div className="mt-10 bg-white border border-gray-200 shadow-md rounded-xl p-6 text-center">
+        <div id="formulaire-contact" className="mt-10 bg-white border border-gray-200 shadow-md rounded-xl p-6 text-center">
           <h3 className="font-semibold text-gray-800 mb-2">
             Vous ne trouvez pas votre réponse ?
           </h3>

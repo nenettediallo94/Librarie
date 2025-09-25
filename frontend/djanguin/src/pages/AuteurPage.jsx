@@ -53,12 +53,12 @@ function AuteurPage() {
           />
         </div>
 
-        <Link
+        {/* <Link
           to="/AjouterUser"
           className="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 transition-colors"
         >
           Ajouter un nouvel auteur
-        </Link>
+        </Link> */}
       </div>
 
       {/* Liste des auteurs filtrés */}

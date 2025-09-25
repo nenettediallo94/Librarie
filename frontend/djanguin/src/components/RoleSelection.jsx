@@ -5,8 +5,8 @@ function RoleSelection() {
     const navigate = useNavigate();
 
     const handleRoleSelection = (role) => {
-        if (role === 'admin') {
-            navigate('/AdminLogin');
+        if (role === 'administrateur') {
+            navigate('/connexion');
         } else {
             // Pour 'auteur' et 'abonné', on redirige vers la page de connexion générale
             navigate('/connexion');
@@ -25,7 +25,7 @@ function RoleSelection() {
                         Auteur ou Abonné
                     </button>
                     <button
-                        onClick={() => handleRoleSelection('admin')}
+                        onClick={() => handleRoleSelection('administrateur')}
                         className="w-full bg-gray-700 text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-transform transform hover:scale-105"
                     >
                         Administrateur

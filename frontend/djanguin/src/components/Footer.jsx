@@ -43,7 +43,7 @@ export default function Footer() {
             <li><Link to="/FAQ" className="hover:text-blue-600">FAQ</Link></li>
             <li><Link to="/GuideUtilisation" className="hover:text-blue-600">Guide d’utilisation</Link></li>
             <li><Link to="/PourLesAuteurs" className="hover:text-blue-600">Pour les Auteurs</Link></li>
-            <li><Link to="/NousContacter" className="hover:text-blue-600">Nous Contacter</Link></li>
+            <li><Link to="/FAQ#formulaire-contact" className="hover:text-blue-600">Nous Contacter</Link></li>
           </ul>
         </div>
       </div>
@@ -51,8 +51,12 @@ export default function Footer() {
       {/* Ligne contact + copyright */}
       <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
         <div className="flex flex-col md:flex-row md:space-x-6 mb-4 md:mb-0">
-          <p className="flex items-center gap-2"><MdEmail />nenettediallo94@gmail.com</p>
-          <p className="flex items-center gap-2"><MdPhone /> +224 622 56 10 90</p>
+          <a href="mailto:nenettediallo94@gmail.com" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+            <MdEmail />nenettediallo94@gmail.com
+          </a>
+          <a href="https://wa.me/224622561090" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+            <MdPhone /> +224 622 56 10 90
+          </a>
           <p className="flex items-center gap-2"><MdLocationOn /> Conakry, Guinée</p>
         </div>
         <p className="text-gray-400 text-center">

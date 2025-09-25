@@ -1,33 +1,4 @@
 
-// // App.js
-// import './App.css';
-// import { useLocation } from 'react-router-dom';
-// import Header from './components/Header';
-// import Main from './components/main';
-
-
-// function App() {
-//   const location = useLocation();
-
-//   // On vérifie si le chemin actuel est celui du formulaire.
-//   // Assurez-vous que le chemin est bien "/AjouterLivre" comme dans votre main.js
-//   const isFormPage = location.pathname === '/AjouterLivre';
- 
-
-//   return (
-//     <div className="flex flex-col min-h-screen mt-20">
-//       {/* Rendu conditionnel : on affiche le Header seulement si ce n'est PAS la page du formulaire */}
-//       {!isFormPage && <Header />}
-//       <main className="flex-grow">
-//         <Main />
-//       </main>
-//     </div>
-//   );
-// }
-
-
-// export default App; 
-
 
 // App.js
 import './App.css';
@@ -35,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Main from './components/main';
 import Footer from './components/Footer';
+import ChatbotWidget from './components/ChatbotWidget';
 
 function App() {
   const location = useLocation();
@@ -45,7 +17,8 @@ function App() {
     '/AdminLogin',   // page login admin
     '/admin/dashboard', // dashboard admin
     '/AjouterActualite', // page ajout actualité
-    '/AjouterUtilisateur' // page ajout utilisateur
+    '/AjouterUser', // page ajout utilisateur
+    '/ModifierLivre', // page modification livre
   ];
 
   // ✅ Pages sur lesquelles le Footer ne doit pas s'afficher
@@ -54,14 +27,21 @@ function App() {
     '/AdminLogin',
     '/admin/dashboard',
     '/AjouterActualite',
-    '/AjouterUtilisateur',
+    '/AjouterUser',
     '/inscription',
     '/connexion',
-    '/selection-role'
+    '/selection-role',
+    '/ModifierLivre',
   ];
 
-  const hideHeader = noHeaderPaths.includes(location.pathname);
-  const hideFooter = noFooterPaths.includes(location.pathname);
+  // Vérifie si le chemin commence par une des routes à masquer
+  const shouldHide = (paths) => {
+    return paths.some(path => location.pathname.startsWith(path));
+  };
+
+  const hideHeader = shouldHide(noHeaderPaths);
+  const hideFooter = shouldHide(noFooterPaths);
+
 
   return (
     <div className="flex flex-col min-h-screen mt-20">
@@ -70,6 +50,7 @@ function App() {
       <main className="flex-grow"><Main /></main>
       {/* Footer conditionnel */}
       {!hideFooter && <Footer />}
+      <ChatbotWidget />
     </div>
   );
 }

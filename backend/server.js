@@ -7,7 +7,7 @@ const http = require('http'); // Importé pour créer le serveur
 const { Server } = require('socket.io'); // Importé pour les WebSockets
 const livresRoutes = require('./routes/livres');
 const authRouter = require('./routes/auth');
-const adminRoutes = require('./routes/admin'); 
+const adminRoutes = require('./routes/admin');
 const auteursRoutes = require('./routes/auteurs');
 const usersRoutes = require('./routes/users');
 const plansRoutes = require('./routes/plans');
@@ -67,7 +67,7 @@ app.use('/api/auteurs', auteursRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/plans', plansRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api/adminlogin', adminloginRoutes);
+app.use('/api/adminlogin', require('./routes/adminlogin')); // Réactivation de la route
 app.use('/api/actualites', actualitesRoutes);
 app.use('/api/temoignages', temoignagesRoutes);
 app.use('/api/newsletter', newsletterRoutes);

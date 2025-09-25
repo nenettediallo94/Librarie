@@ -45,12 +45,12 @@ function CataloguePage() {
         </div>
 
         {/* Bouton Ajouter un livre */}
-        <Link
+        {/* <Link
           to="/AjouterLivre"
           className="btn-primary text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 transition-colors"
         >
           Ajouter un nouveau livre
-        </Link>
+        </Link> */}
       </div>
 
       {/* Liste des livres filtrés */}

@@ -94,7 +94,7 @@ const BookForm = () => {
     <div className="book-form-container">
       <div className="form-header">
         <h1 className="form-title">Ajouter un nouveau livre</h1>
-        <Link to="/DashboardAdmin">
+        <Link to="/admin/dashboard">
           <button className="back-btn">← Retour au tableau de bord</button>
         </Link>
       </div>
